@@ -1,0 +1,17 @@
+click==8.1.7
+colorama==0.4.6
+joblib==1.4.2
+nltk==3.8.1
+regex
+tqdm==4.66.4
+pandas
+numpy
+scikit-learn
+streamlit
+fastapi
+uvicorn
+wordcloud
+matplotlib
+pyjwt
+python-multipart
+python-dotenv
