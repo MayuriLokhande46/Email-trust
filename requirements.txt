@@ -15,3 +15,5 @@ matplotlib
 pyjwt
 python-multipart
 python-dotenv
+requests
+deep-translator

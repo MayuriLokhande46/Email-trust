@@ -1,0 +1,295 @@
+2026-02-17 14:40:38,443 - spam_detector.src.api - ERROR - Registration error: SQLite objects created in a thread can only be used in that same thread. The object was created in thread id 19632 and this is thread id 24960.
+2026-02-17 14:40:38,445 - spam_detector.src.api - ERROR - HTTP Exception: Registration failed
+2026-02-17 14:42:58,479 - spam_detector.src.api - INFO - User registered: mayurilokhande
+2026-02-17 14:43:25,743 - spam_detector.src.security - INFO - Access token created for user: mayurilokhande
+2026-02-17 14:43:25,743 - spam_detector.src.api - INFO - User logged in: mayurilokhande
+2026-02-17 14:44:55,970 - spam_detector.src.api - INFO - Prediction requested by mayurilokhande
+2026-02-17 14:44:57,493 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-17 14:44:57,512 - spam_detector.src.database - INFO - Prediction saved: spam (confidence: 0.87)
+2026-02-17 14:44:57,513 - spam_detector.src.api - INFO - Prediction saved: spam (0.87)
+2026-02-17 14:45:29,933 - spam_detector.src.api - INFO - Batch prediction requested by mayurilokhande for 9 emails
+2026-02-17 14:45:29,934 - spam_detector.src.predict - WARNING - Text became empty after cleaning
+2026-02-17 14:45:29,950 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 1.00)
+2026-02-17 14:45:29,951 - spam_detector.src.predict - WARNING - Text became empty after cleaning
+2026-02-17 14:45:29,963 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 1.00)
+2026-02-17 14:45:29,983 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-17 14:45:29,983 - spam_detector.src.predict - WARNING - Error computing advanced features: cannot access local variable 'reputation' where it is not associated with a value
+2026-02-17 14:45:29,995 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 0.57)
+2026-02-17 14:45:30,016 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-17 14:45:30,017 - spam_detector.src.predict - WARNING - Error computing advanced features: cannot access local variable 'reputation' where it is not associated with a value
+2026-02-17 14:45:30,032 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 0.87)
+2026-02-17 14:45:30,049 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-17 14:45:30,050 - spam_detector.src.predict - WARNING - Error computing advanced features: cannot access local variable 'reputation' where it is not associated with a value
+2026-02-17 14:45:30,061 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 0.97)
+2026-02-17 14:45:30,081 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-17 14:45:30,082 - spam_detector.src.predict - WARNING - Error computing advanced features: cannot access local variable 'reputation' where it is not associated with a value
+2026-02-17 14:45:30,094 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 0.79)
+2026-02-17 14:45:30,115 - spam_detector.src.email_headers - INFO - Extracted 0 headers
+2026-02-17 14:45:30,115 - spam_detector.src.predict - WARNING - Error computing advanced features: cannot access local variable 'reputation' where it is not associated with a value
+2026-02-17 14:45:30,127 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 0.98)
+2026-02-17 14:45:30,145 - spam_detector.src.email_headers - INFO - Extracted 0 headers
+2026-02-17 14:45:30,145 - spam_detector.src.predict - WARNING - Error computing advanced features: cannot access local variable 'reputation' where it is not associated with a value
+2026-02-17 14:45:30,158 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 0.74)
+2026-02-17 14:45:30,177 - spam_detector.src.email_headers - INFO - Extracted 0 headers
+2026-02-17 14:45:30,178 - spam_detector.src.predict - WARNING - Error computing advanced features: cannot access local variable 'reputation' where it is not associated with a value
+2026-02-17 14:45:30,186 - spam_detector.src.database - INFO - Prediction saved: spam (confidence: 0.64)
+2026-02-17 14:45:30,187 - spam_detector.src.api - INFO - Batch prediction completed: 9/9 successful
+2026-02-17 15:29:07,166 - spam_detector.src.api - WARNING - Registration failed - username exists: mayurilokhande
+2026-02-17 15:29:07,173 - spam_detector.src.api - ERROR - Registration error: 409: Username already exists
+2026-02-17 15:29:07,177 - spam_detector.src.api - ERROR - HTTP Exception: Registration failed
+2026-02-17 15:32:11,850 - spam_detector.src.api - WARNING - Registration failed - username exists: mayurilokhande
+2026-02-17 15:32:11,856 - spam_detector.src.api - ERROR - HTTP Exception: Username already exists
+2026-02-17 15:32:50,713 - spam_detector.src.api - INFO - User registered: sourabhlokhande
+2026-02-17 15:33:13,553 - spam_detector.src.security - INFO - Access token created for user: sourabhlokhande
+2026-02-17 15:33:13,554 - spam_detector.src.api - INFO - User logged in: sourabhlokhande
+2026-02-17 15:33:57,148 - spam_detector.src.api - INFO - Prediction requested by sourabhlokhande
+2026-02-17 15:34:16,391 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-17 15:34:16,539 - spam_detector.src.database - INFO - Prediction saved: spam (confidence: 0.78)
+2026-02-17 15:34:16,551 - spam_detector.src.api - INFO - Prediction saved: spam (0.78)
+2026-02-17 15:39:20,761 - spam_detector.src.api - WARNING - Registration failed - username exists: sourabhlokhande
+2026-02-17 15:39:20,763 - spam_detector.src.api - ERROR - HTTP Exception: Username already exists
+2026-02-17 15:39:34,391 - spam_detector.src.api - WARNING - Registration failed - username exists: sourabhlokhande
+2026-02-17 15:39:34,397 - spam_detector.src.api - ERROR - HTTP Exception: Username already exists
+2026-02-17 15:40:12,638 - spam_detector.src.api - INFO - User registered: rohitshukla
+2026-02-17 15:40:37,135 - spam_detector.src.security - INFO - Access token created for user: rohitshukla
+2026-02-17 15:40:37,139 - spam_detector.src.api - INFO - User logged in: rohitshukla
+2026-02-17 15:40:38,467 - spam_detector.src.security - INFO - Access token created for user: rohitshukla
+2026-02-17 15:40:38,479 - spam_detector.src.api - INFO - User logged in: rohitshukla
+2026-02-17 15:41:20,337 - spam_detector.src.api - INFO - Prediction requested by rohitshukla
+2026-02-17 15:41:23,113 - spam_detector.src.api - INFO - Prediction requested by rohitshukla
+2026-02-17 15:41:36,513 - spam_detector.src.api - INFO - Prediction requested by rohitshukla
+2026-02-17 15:41:38,436 - spam_detector.src.api - INFO - Prediction requested by rohitshukla
+2026-02-17 15:42:08,620 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-17 15:42:08,633 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-17 15:42:08,895 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 0.85)
+2026-02-17 15:42:08,983 - spam_detector.src.api - INFO - Prediction saved: ham (0.85)
+2026-02-17 15:42:08,989 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 0.85)
+2026-02-17 15:42:09,031 - spam_detector.src.api - INFO - Prediction saved: ham (0.85)
+2026-02-17 15:42:09,604 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-17 15:42:09,881 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 0.85)
+2026-02-17 15:42:09,884 - spam_detector.src.api - INFO - Prediction saved: ham (0.85)
+2026-02-17 15:42:10,895 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-17 15:42:11,015 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 0.85)
+2026-02-17 15:42:11,115 - spam_detector.src.api - INFO - Prediction saved: ham (0.85)
+2026-02-17 15:51:13,369 - spam_detector.src.api - INFO - User registered: shanvijain
+2026-02-17 15:51:41,728 - spam_detector.src.security - INFO - Access token created for user: shanvijain
+2026-02-17 15:51:41,755 - spam_detector.src.api - INFO - User logged in: shanvijain
+2026-02-17 15:51:57,940 - spam_detector.src.api - INFO - Prediction requested by shanvijain
+2026-02-17 15:52:08,139 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-17 15:52:08,171 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 0.85)
+2026-02-17 15:52:08,182 - spam_detector.src.api - INFO - Prediction saved: ham (0.85)
+2026-02-17 15:54:07,341 - spam_detector.src.api - INFO - Prediction requested by shanvijain
+2026-02-17 15:54:08,477 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-17 15:54:08,910 - spam_detector.src.database - INFO - Prediction saved: spam (confidence: 0.87)
+2026-02-17 15:54:08,919 - spam_detector.src.api - INFO - Prediction saved: spam (0.87)
+2026-02-17 15:54:09,056 - spam_detector.src.api - INFO - Prediction requested by shanvijain
+2026-02-17 15:54:09,473 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-17 15:54:09,534 - spam_detector.src.database - INFO - Prediction saved: spam (confidence: 0.87)
+2026-02-17 15:54:09,590 - spam_detector.src.api - INFO - Prediction saved: spam (0.87)
+2026-02-17 15:55:38,794 - spam_detector.src.api - INFO - User registered: nidhipal
+2026-02-17 15:55:59,146 - spam_detector.src.security - INFO - Access token created for user: nidhipal
+2026-02-17 15:55:59,148 - spam_detector.src.api - INFO - User logged in: nidhipal
+2026-02-17 15:56:48,521 - spam_detector.src.api - INFO - Prediction requested by nidhipal
+2026-02-17 15:56:55,055 - spam_detector.src.api - INFO - Prediction requested by nidhipal
+2026-02-17 15:56:55,093 - spam_detector.src.api - INFO - Prediction requested by nidhipal
+2026-02-17 15:56:57,186 - spam_detector.src.api - INFO - Prediction requested by nidhipal
+2026-02-17 15:57:01,486 - spam_detector.src.api - INFO - Prediction requested by nidhipal
+2026-02-17 15:57:03,421 - spam_detector.src.api - INFO - Prediction requested by nidhipal
+2026-02-17 15:57:09,695 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-17 15:57:10,313 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-17 15:57:11,487 - spam_detector.src.database - INFO - Prediction saved: spam (confidence: 0.57)
+2026-02-17 15:57:11,837 - spam_detector.src.database - INFO - Prediction saved: spam (confidence: 0.57)
+2026-02-17 15:57:12,013 - spam_detector.src.api - INFO - Prediction saved: spam (0.57)
+2026-02-17 15:57:12,073 - spam_detector.src.api - INFO - Prediction saved: spam (0.57)
+2026-02-17 15:57:26,829 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-17 15:57:27,316 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-17 15:57:28,391 - spam_detector.src.database - INFO - Prediction saved: spam (confidence: 0.57)
+2026-02-17 15:57:28,433 - spam_detector.src.api - INFO - Prediction saved: spam (0.57)
+2026-02-17 15:57:28,433 - spam_detector.src.database - INFO - Prediction saved: spam (confidence: 0.57)
+2026-02-17 15:57:28,630 - spam_detector.src.api - INFO - Prediction saved: spam (0.57)
+2026-02-17 15:57:33,422 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-17 15:57:33,513 - spam_detector.src.database - INFO - Prediction saved: spam (confidence: 0.57)
+2026-02-17 15:57:33,525 - spam_detector.src.api - INFO - Prediction saved: spam (0.57)
+2026-02-17 15:57:34,258 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-17 15:57:34,273 - spam_detector.src.database - INFO - Prediction saved: spam (confidence: 0.57)
+2026-02-17 15:57:34,274 - spam_detector.src.api - INFO - Prediction saved: spam (0.57)
+2026-02-17 16:00:50,877 - spam_detector.src.api - INFO - User registered: testuser_1771324204
+2026-02-17 16:00:52,931 - spam_detector.src.security - INFO - Access token created for user: testuser_1771324204
+2026-02-17 16:00:52,931 - spam_detector.src.api - INFO - User logged in: testuser_1771324204
+2026-02-17 16:00:55,009 - spam_detector.src.api - INFO - Prediction requested by testuser_1771324204
+2026-02-17 16:01:02,034 - spam_detector.src.email_headers - INFO - Extracted 0 headers
+2026-02-17 16:01:02,116 - spam_detector.src.database - INFO - Prediction saved: spam (confidence: 0.84)
+2026-02-17 16:01:02,136 - spam_detector.src.api - INFO - Prediction saved: spam (0.84)
+2026-02-17 16:02:55,344 - spam_detector.src.api - INFO - User registered: ridhimapandey
+2026-02-17 16:03:14,311 - spam_detector.src.security - INFO - Access token created for user: ridhimapandey
+2026-02-17 16:03:14,312 - spam_detector.src.api - INFO - User logged in: ridhimapandey
+2026-02-17 16:03:51,721 - spam_detector.src.api - INFO - Prediction requested by ridhimapandey
+2026-02-17 16:03:58,865 - spam_detector.src.api - INFO - Prediction requested by ridhimapandey
+2026-02-17 16:04:04,696 - spam_detector.src.api - INFO - Prediction requested by ridhimapandey
+2026-02-17 16:04:09,153 - spam_detector.src.email_headers - INFO - Extracted 0 headers
+2026-02-17 16:04:09,154 - spam_detector.src.email_headers - INFO - Extracted 0 headers
+2026-02-17 16:04:09,345 - spam_detector.src.database - INFO - Prediction saved: spam (confidence: 0.57)
+2026-02-17 16:04:09,454 - spam_detector.src.api - INFO - Prediction saved: spam (0.57)
+2026-02-17 16:04:09,524 - spam_detector.src.database - INFO - Prediction saved: spam (confidence: 0.57)
+2026-02-17 16:04:09,529 - spam_detector.src.api - INFO - Prediction saved: spam (0.57)
+2026-02-17 16:04:12,885 - spam_detector.src.email_headers - INFO - Extracted 0 headers
+2026-02-17 16:04:12,983 - spam_detector.src.database - INFO - Prediction saved: spam (confidence: 0.57)
+2026-02-17 16:04:12,989 - spam_detector.src.api - INFO - Prediction saved: spam (0.57)
+2026-02-17 16:05:11,628 - spam_detector.src.api - INFO - Batch prediction requested by ridhimapandey for 9 emails
+2026-02-17 16:05:11,630 - spam_detector.src.predict - WARNING - Text became empty after cleaning
+2026-02-17 16:05:11,652 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 1.00)
+2026-02-17 16:05:11,654 - spam_detector.src.predict - WARNING - Text became empty after cleaning
+2026-02-17 16:05:11,742 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 1.00)
+2026-02-17 16:05:11,936 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-17 16:05:11,951 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 0.57)
+2026-02-17 16:05:12,098 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-17 16:05:12,125 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 0.87)
+2026-02-17 16:05:12,236 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-17 16:05:12,257 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 0.97)
+2026-02-17 16:05:12,391 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-17 16:05:12,409 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 0.79)
+2026-02-17 16:05:12,525 - spam_detector.src.email_headers - INFO - Extracted 0 headers
+2026-02-17 16:05:12,633 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 0.98)
+2026-02-17 16:05:12,766 - spam_detector.src.email_headers - INFO - Extracted 0 headers
+2026-02-17 16:05:12,801 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 0.74)
+2026-02-17 16:05:12,918 - spam_detector.src.email_headers - INFO - Extracted 0 headers
+2026-02-17 16:05:12,947 - spam_detector.src.database - INFO - Prediction saved: spam (confidence: 0.64)
+2026-02-17 16:05:12,947 - spam_detector.src.api - INFO - Batch prediction completed: 9/9 successful
+2026-02-17 16:05:29,096 - spam_detector.src.api - INFO - Prediction requested by ridhimapandey
+2026-02-17 16:05:29,135 - spam_detector.src.email_headers - INFO - Extracted 0 headers
+2026-02-17 16:05:29,221 - spam_detector.src.database - INFO - Prediction saved: spam (confidence: 0.57)
+2026-02-17 16:05:29,237 - spam_detector.src.api - INFO - Prediction saved: spam (0.57)
+2026-02-17 16:05:42,264 - spam_detector.src.api - INFO - History requested by ridhimapandey (limit: 50)
+2026-02-17 16:05:42,657 - spam_detector.src.database - INFO - Retrieved 50 prediction records
+2026-02-20 12:51:13,540 - spam_detector.src.api - INFO - User registered: ritashrivastaw
+2026-02-20 12:51:41,610 - spam_detector.src.security - INFO - Access token created for user: ritashrivastaw
+2026-02-20 12:51:41,610 - spam_detector.src.api - INFO - User logged in: ritashrivastaw
+2026-02-20 12:52:44,507 - spam_detector.src.api - INFO - Prediction requested by ritashrivastaw
+2026-02-20 12:52:46,549 - spam_detector.src.email_headers - INFO - Extracted 0 headers
+2026-02-20 12:52:46,566 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 0.75)
+2026-02-20 12:52:46,567 - spam_detector.src.api - INFO - Prediction saved: ham (0.75)
+2026-02-20 12:59:01,683 - spam_detector.src.api - INFO - User registered: shanvikapoor
+2026-02-20 12:59:20,257 - spam_detector.src.security - INFO - Access token created for user: shanvikapoor
+2026-02-20 12:59:20,260 - spam_detector.src.api - INFO - User logged in: shanvikapoor
+2026-02-20 12:59:46,833 - spam_detector.src.api - INFO - Prediction requested by shanvikapoor
+2026-02-20 12:59:46,951 - spam_detector.src.email_headers - INFO - Extracted 0 headers
+2026-02-20 12:59:46,976 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 0.75)
+2026-02-20 12:59:46,991 - spam_detector.src.api - INFO - Prediction saved: ham (0.75)
+2026-02-20 13:01:30,465 - spam_detector.src.api - INFO - Prediction requested by shanvikapoor
+2026-02-20 13:01:30,546 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-20 13:01:30,568 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 0.80)
+2026-02-20 13:01:30,569 - spam_detector.src.api - INFO - Prediction saved: ham (0.80)
+2026-02-20 13:01:36,813 - spam_detector.src.api - INFO - Prediction requested by shanvikapoor
+2026-02-20 13:01:36,839 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-20 13:01:36,865 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 0.80)
+2026-02-20 13:01:36,866 - spam_detector.src.api - INFO - Prediction saved: ham (0.80)
+2026-02-20 13:04:29,477 - spam_detector.src.security - INFO - Access token created for user: nidhipal
+2026-02-20 13:04:29,478 - spam_detector.src.api - INFO - User logged in: nidhipal
+2026-02-20 13:05:12,244 - spam_detector.src.api - INFO - Prediction requested by ritashrivastaw
+2026-02-20 13:05:12,282 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-20 13:05:12,299 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 0.80)
+2026-02-20 13:05:12,300 - spam_detector.src.api - INFO - Prediction saved: ham (0.80)
+2026-02-20 13:06:53,040 - spam_detector.src.api - INFO - Prediction requested by nidhipal
+2026-02-20 13:06:53,109 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-20 13:06:53,132 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 0.74)
+2026-02-20 13:06:53,134 - spam_detector.src.api - INFO - Prediction saved: ham (0.74)
+2026-02-20 13:11:56,013 - spam_detector.src.security - INFO - Access token created for user: nidhipal
+2026-02-20 13:11:56,018 - spam_detector.src.api - INFO - User logged in: nidhipal
+2026-02-20 13:12:18,513 - spam_detector.src.api - INFO - Prediction requested by nidhipal
+2026-02-20 13:12:18,576 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-20 13:12:18,589 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 0.74)
+2026-02-20 13:12:18,591 - spam_detector.src.api - INFO - Prediction saved: ham (0.74)
+2026-02-20 13:25:41,525 - spam_detector.src.api - WARNING - Login failed for user: mayurilokhande
+2026-02-20 13:25:41,557 - spam_detector.src.api - ERROR - HTTP Exception: Invalid username or password
+2026-02-20 13:25:49,173 - spam_detector.src.api - WARNING - Login failed for user: mayurilokhande
+2026-02-20 13:25:49,175 - spam_detector.src.api - ERROR - HTTP Exception: Invalid username or password
+2026-02-20 13:26:04,838 - spam_detector.src.api - WARNING - Login failed for user: mayurilokhande
+2026-02-20 13:26:04,839 - spam_detector.src.api - ERROR - HTTP Exception: Invalid username or password
+2026-02-20 13:27:15,043 - spam_detector.src.api - INFO - User registered: ruhipeher
+2026-02-20 13:27:43,160 - spam_detector.src.security - INFO - Access token created for user: ruhipeher
+2026-02-20 13:27:43,161 - spam_detector.src.api - INFO - User logged in: ruhipeher
+2026-02-20 13:28:01,808 - spam_detector.src.api - INFO - Prediction requested by ruhipeher
+2026-02-20 13:28:01,937 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-20 13:28:01,973 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 0.74)
+2026-02-20 13:28:01,976 - spam_detector.src.api - INFO - Prediction saved: ham (0.74)
+2026-02-20 13:28:22,266 - spam_detector.src.api - INFO - History requested by ruhipeher (limit: 50)
+2026-02-20 13:28:22,301 - spam_detector.src.database - INFO - Retrieved 50 prediction records
+2026-02-20 13:28:38,069 - spam_detector.src.api - INFO - Prediction requested by ruhipeher
+2026-02-20 13:28:38,106 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-20 13:28:38,123 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 0.74)
+2026-02-20 13:28:38,124 - spam_detector.src.api - INFO - Prediction saved: ham (0.74)
+2026-02-20 13:28:40,205 - spam_detector.src.api - INFO - History requested by ruhipeher (limit: 50)
+2026-02-20 13:28:40,214 - spam_detector.src.database - INFO - Retrieved 50 prediction records
+2026-02-20 13:37:59,898 - spam_detector.src.api - INFO - User registered: ritashyam
+2026-02-20 13:38:20,062 - spam_detector.src.security - INFO - Access token created for user: ritashyam
+2026-02-20 13:38:20,064 - spam_detector.src.api - INFO - User logged in: ritashyam
+2026-02-20 13:38:53,906 - spam_detector.src.api - INFO - Prediction requested by ritashyam
+2026-02-20 13:38:53,989 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-20 13:38:54,022 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 0.74)
+2026-02-20 13:38:54,025 - spam_detector.src.api - INFO - Prediction saved: ham (0.74)
+2026-02-20 13:39:31,372 - spam_detector.src.api - INFO - Batch prediction requested by ritashyam for 9 emails
+2026-02-20 13:39:31,380 - spam_detector.src.predict - WARNING - Text became empty after cleaning
+2026-02-20 13:39:31,414 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 1.00)
+2026-02-20 13:39:31,416 - spam_detector.src.predict - WARNING - Text became empty after cleaning
+2026-02-20 13:39:31,439 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 1.00)
+2026-02-20 13:39:31,531 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-20 13:39:31,548 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 0.57)
+2026-02-20 13:39:31,609 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-20 13:39:31,624 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 0.87)
+2026-02-20 13:39:31,658 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-20 13:39:31,674 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 0.97)
+2026-02-20 13:39:31,715 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-20 13:39:31,739 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 0.79)
+2026-02-20 13:39:31,774 - spam_detector.src.email_headers - INFO - Extracted 0 headers
+2026-02-20 13:39:31,788 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 0.98)
+2026-02-20 13:39:31,820 - spam_detector.src.email_headers - INFO - Extracted 0 headers
+2026-02-20 13:39:31,838 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 0.74)
+2026-02-20 13:39:31,877 - spam_detector.src.email_headers - INFO - Extracted 0 headers
+2026-02-20 13:39:31,895 - spam_detector.src.database - INFO - Prediction saved: spam (confidence: 0.64)
+2026-02-20 13:39:31,896 - spam_detector.src.api - INFO - Batch prediction completed: 9/9 successful
+2026-02-20 13:39:48,369 - spam_detector.src.api - INFO - Prediction requested by ritashyam
+2026-02-20 13:39:48,392 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-20 13:39:48,412 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 0.74)
+2026-02-20 13:39:48,414 - spam_detector.src.api - INFO - Prediction saved: ham (0.74)
+2026-02-20 13:41:35,505 - spam_detector.src.api - INFO - Prediction requested by ritashyam
+2026-02-20 13:41:35,626 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-20 13:41:35,652 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 0.78)
+2026-02-20 13:41:35,654 - spam_detector.src.api - INFO - Prediction saved: ham (0.78)
+2026-02-20 14:02:35,666 - spam_detector.src.security - INFO - Access token created for user: sourabhlokhande
+2026-02-20 14:02:35,674 - spam_detector.src.api - INFO - User logged in: sourabhlokhande
+2026-02-20 14:03:24,924 - spam_detector.src.api - INFO - Prediction requested by sourabhlokhande
+2026-02-20 14:03:25,238 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-20 14:03:25,272 - spam_detector.src.database - INFO - Prediction saved: spam (confidence: 0.73)
+2026-02-20 14:03:25,276 - spam_detector.src.api - INFO - Prediction saved: spam (0.73)
+2026-02-20 14:03:41,396 - spam_detector.src.api - INFO - History requested by sourabhlokhande (limit: 50)
+2026-02-20 14:03:41,448 - spam_detector.src.database - INFO - Retrieved 50 prediction records
+2026-02-20 14:03:52,748 - spam_detector.src.api - INFO - History requested by sourabhlokhande (limit: 50)
+2026-02-20 14:03:52,798 - spam_detector.src.database - INFO - Retrieved 50 prediction records
+2026-02-20 14:03:55,193 - spam_detector.src.api - INFO - Batch prediction requested by sourabhlokhande for 9 emails
+2026-02-20 14:03:55,196 - spam_detector.src.predict - WARNING - Text became empty after cleaning
+2026-02-20 14:03:55,221 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 1.00)
+2026-02-20 14:03:55,224 - spam_detector.src.predict - WARNING - Text became empty after cleaning
+2026-02-20 14:03:55,254 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 1.00)
+2026-02-20 14:03:55,323 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-20 14:03:55,345 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 0.57)
+2026-02-20 14:03:55,405 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-20 14:03:55,419 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 0.87)
+2026-02-20 14:03:55,445 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-20 14:03:55,461 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 0.97)
+2026-02-20 14:03:55,493 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-20 14:03:55,510 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 0.79)
+2026-02-20 14:03:55,553 - spam_detector.src.email_headers - INFO - Extracted 0 headers
+2026-02-20 14:03:55,568 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 0.98)
+2026-02-20 14:03:55,599 - spam_detector.src.email_headers - INFO - Extracted 0 headers
+2026-02-20 14:03:55,614 - spam_detector.src.database - INFO - Prediction saved: ham (confidence: 0.74)
+2026-02-20 14:03:55,636 - spam_detector.src.email_headers - INFO - Extracted 0 headers
+2026-02-20 14:03:55,647 - spam_detector.src.database - INFO - Prediction saved: spam (confidence: 0.64)
+2026-02-20 14:03:55,648 - spam_detector.src.api - INFO - Batch prediction completed: 9/9 successful
+2026-02-20 14:03:57,738 - spam_detector.src.api - INFO - History requested by sourabhlokhande (limit: 50)
+2026-02-20 14:03:57,745 - spam_detector.src.database - INFO - Retrieved 50 prediction records
+2026-02-20 14:04:05,983 - spam_detector.src.api - INFO - Prediction requested by sourabhlokhande
+2026-02-20 14:04:06,016 - spam_detector.src.email_headers - INFO - Extracted 1 headers
+2026-02-20 14:04:06,032 - spam_detector.src.database - INFO - Prediction saved: spam (confidence: 0.73)
+2026-02-20 14:04:06,033 - spam_detector.src.api - INFO - Prediction saved: spam (0.73)
+2026-02-20 14:04:08,142 - spam_detector.src.api - INFO - History requested by sourabhlokhande (limit: 50)
+2026-02-20 14:04:08,150 - spam_detector.src.database - INFO - Retrieved 50 prediction records

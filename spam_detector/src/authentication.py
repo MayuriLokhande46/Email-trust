@@ -1,9 +1,13 @@
-
 import sqlite3
 import hashlib
+import os
+
+# Use absolute path for users.db
+ROOT = os.path.dirname(os.path.dirname(__file__))
+DB_PATH = os.path.join(ROOT, 'data', 'users.db')
 
 def create_connection():
-    conn = sqlite3.connect('users.db')
+    conn = sqlite3.connect(DB_PATH, check_same_thread=False)
     return conn
 
 def create_table(conn):

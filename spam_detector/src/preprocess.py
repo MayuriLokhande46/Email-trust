@@ -58,8 +58,8 @@ def clean_text(text: str) -> str:
         # Remove email addresses
         text = re.sub(r'\S+@\S+', ' ', text)
         
-        # Remove special characters (keep only alphanumeric and space)
-        text = re.sub(r'[^a-z0-9\s]', ' ', text)
+        # Remove special characters (keep alphanumeric, space, $, and !)
+        text = re.sub(r'[^a-z0-9\s$!]', ' ', text)
         text = re.sub(r'\s+', ' ', text).strip()
         
         # Tokenize
@@ -72,11 +72,12 @@ def clean_text(text: str) -> str:
         # Filter and lemmatize
         processed_tokens = []
         for token in tokens:
-            if not token or not token.isalnum():
+            if not token:
                 continue
             
-            # Keep single-letter alphabetic tokens or non-stopword tokens
-            if (len(token) == 1 and token.isalpha()) or (token not in _stopwords):
+            # Keep single-letter alphabetic tokens, tokens with $ or !, or non-stopword tokens
+            is_special = '$' in token or '!' in token
+            if (len(token) == 1 and token.isalpha()) or is_special or (token not in _stopwords):
                 try:
                     lemmatized = lemmatizer.lemmatize(token)
                     processed_tokens.append(lemmatized)

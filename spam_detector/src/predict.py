@@ -25,9 +25,9 @@ try:
     EmailUrlExtractor = fe.EmailUrlExtractor
     import spam_detector.src.email_headers as eh
     CompleteHeaderAnalyzer = eh.CompleteHeaderAnalyzer
-    import spam_detector.src.multilingual as ml
-    detect_language = ml.detect_language
-    translate_to_english = ml.translate_to_english
+    import spam_detector.src.translation_service as ts
+    detect_language = ts.detect_language
+    translate_to_english = ts.translate_to_english
 except ImportError:
     import preprocess as pre
     clean_text = pre.clean_text
@@ -39,9 +39,9 @@ except ImportError:
     EmailUrlExtractor = fe.EmailUrlExtractor
     import email_headers as eh
     CompleteHeaderAnalyzer = eh.CompleteHeaderAnalyzer
-    import multilingual as ml
-    detect_language = ml.detect_language
-    translate_to_english = ml.translate_to_english
+    import translation_service as ts
+    detect_language = ts.detect_language
+    translate_to_english = ts.translate_to_english
 
 # Set up logging
 logger = logging.getLogger(__name__)

@@ -22,11 +22,8 @@ try:
     import spam_detector.src.predict as predict_module
     predict = predict_module.predict
 except ImportError:
-    try:
-        import predict as predict_module
-        predict = predict_module.predict
-    except ImportError:
-        predict = None
+    import predict as predict_module
+    predict = predict_module.predict
 
 # --- Configuration ---
 API_URL = os.getenv("API_URL", "http://localhost:8000")

@@ -1,0 +1,25 @@
+services:
+  backend:
+    build: .
+    command: uvicorn spam_detector.src.api:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONPATH=/app/spam_detector/src
+    restart: always
+
+  frontend:
+    build: .
+    command: streamlit run spam_detector/src/app.py
+    volumes:
+      - .:/app
+    ports:
+      - "8501:8501"
+    environment:
+      - PYTHONPATH=/app/spam_detector/src
+      - API_URL=http://backend:8000
+    depends_on:
+      - backend
+    restart: always

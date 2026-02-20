@@ -48,27 +48,6 @@ except ImportError:
     get_current_user = sec_module.get_current_user
     import authentication as auth
 
-try:
-    from spam_detector.src.predict import predict
-    from spam_detector.src.database import (
-        save_prediction, get_all_predictions, 
-        save_blocked, get_blocked_emails
-    )
-    from spam_detector.src.security import (
-        create_access_token, get_current_user
-    )
-    from spam_detector.src import authentication as auth
-except ImportError:
-    from predict import predict
-    from database import (
-        save_prediction, get_all_predictions, 
-        save_blocked, get_blocked_emails
-    )
-    from security import (
-        create_access_token, get_current_user
-    )
-    import authentication as auth
-
 # Set up logging
 LOG_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'logs')
 os.makedirs(LOG_DIR, exist_ok=True)
