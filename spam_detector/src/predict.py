@@ -1,14 +1,16 @@
+import re
 import os
 import joblib
 import json
 import logging
 from typing import Dict, Any
-from preprocess import clean_text
-from features import load_vectorizer
-from feature_engineering import (
+from .preprocess import clean_text
+from .features import load_vectorizer
+from .feature_engineering import (
     EmailHeaderExtractor, SenderReputationChecker, EmailUrlExtractor
 )
-from email_headers import CompleteHeaderAnalyzer
+from .email_headers import CompleteHeaderAnalyzer
+from .multilingual import detect_language, translate_to_english
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -63,19 +65,19 @@ except Exception as e:
 def predict(text: str, use_advanced_features: bool = True) -> Dict[str, Any]:
     """
     Predict if the given text is spam or ham.
-    
-    Args:
-        text (str): The email text to classify
-        use_advanced_features (bool): Whether to use advanced feature engineering
-        
-    Returns:
-        Dict with keys: label, prob_spam (if available), spam_words, 
-                       header_features (if enabled), urls (if enabled)
-        
-    Raises:
-        ValueError: If text is empty or invalid
-        RuntimeError: If model is not loaded
     """
+    # 1. Initialize ALL variables at the top of function scope for safety
+    reputation = {}
+    advanced_spam_score = 0.0
+    header_features = {}
+    url_analysis = {}
+    header_analysis = {'status': 'failed'}
+    heuristic_spam = False
+    heuristic_reasons = []
+    translated_text = text
+    detected_lang = 'en'
+    found_spam_words = []
+    
     try:
         if not isinstance(text, str):
             raise ValueError('Input must be a string')
@@ -86,45 +88,99 @@ def predict(text: str, use_advanced_features: bool = True) -> Dict[str, Any]:
         if model is None or vect is None:
             raise RuntimeError('Model or vectorizer not loaded. Check initialization logs.')
         
-        # Clean and preprocess text
-        clean = clean_text(text)
+        # Language detection and translation
+        try:
+            detected_lang = detect_language(text)
+            if detected_lang != 'en':
+                translated_text = translate_to_english(text, source_lang=detected_lang)
+                logger.info(f'Translated {detected_lang} content for analysis')
+        except Exception as e:
+            logger.warning(f'Language handling error: {str(e)}')
+
+        # 2. Heuristic-based direct spam detection (Raw text check)
+        raw_text_lower = text.lower()
         
-        if not clean or clean.isspace():
-            logger.warning('Text became empty after cleaning')
-            return {
-                'label': 'ham',
-                'prob_spam': 0.0,
-                'spam_words': [],
-                'warning': 'Text became empty after preprocessing'
-            }
+        # Broad Phishing & Call-to-action patterns
+        if re.search(r'click.*here.*to.*(verify|confirm|re-activate|update|authenticate)', raw_text_lower) or \
+           re.search(r'verify.*your.*(account|identity|email|details)', raw_text_lower) or \
+           re.search(r'security.*(alert|update).*account', raw_text_lower) or \
+           re.search(r'unauthorized.*(access|activity)', raw_text_lower) or \
+           re.search(r'login.*to.*(restore|secure|verify)', raw_text_lower):
+            heuristic_spam = True
+            heuristic_reasons.append("Phishing pattern detected")
         
-        # Find which spam words are in the text
+        # Broad Financial/Lottery patterns
+        if re.search(r'\$\d+.*(million|thousand|cash|bonus|prize|reward)', raw_text_lower) or \
+           re.search(r'winner.*of.*(lottery|draw|sweepstakes|prize)', raw_text_lower) or \
+           re.search(r'claim.*your.*(cash|reward|prizes|bonus)', raw_text_lower) or \
+           re.search(r'receive.*\$[0-9]+', raw_text_lower):
+            heuristic_spam = True
+            heuristic_reasons.append("Financial/Lottery pattern detected")
+
+        # Broad Urgency & Account Status
+        if re.search(r'(urgent|important|action).*required', raw_text_lower) or \
+           re.search(r'account.*(suspended|locked|blocked|temporary|frozen)', raw_text_lower) or \
+           re.search(r'final.*notice|last.*warning|expires.*in.*\d+.*hours', raw_text_lower) or \
+           re.search(r'immediate.*action.*needed', raw_text_lower):
+            heuristic_spam = True
+            heuristic_reasons.append("Urgency/Account status manipulation")
+            
+        # 3. Clean and prepare for ML model
+        clean = clean_text(translated_text)
+        found_spam_words = [word for word in clean.split() if word in spam_words_list]
+
+        # Prepare default result_dict
+        result_dict: Dict[str, Any] = {
+            'label': 'ham',
+            'prob_spam': 0.0,
+            'confidence': 1.0,
+            'language': detected_lang,
+            'explanation': [],
+            'spam_words': found_spam_words
+        }
+
+        # Run ML model on cleaned text
+        clean = clean_text(translated_text)
+        
+        # Identify which spam words are in the text for highlighting
         found_spam_words = [word for word in clean.split() if word in spam_words_list]
         
-        # Vectorize and predict
-        X = vect.transform([clean])
+        # Prepare a default result_dict
+        result_dict: Dict[str, Any] = {
+            'label': 'ham',
+            'prob_spam': 0.0,
+            'confidence': 1.0,
+            'language': detected_lang,
+            'explanation': [],
+            'spam_words': found_spam_words
+        }
         
-        result_dict = {}
-        
-        if hasattr(model, 'predict_proba'):
-            prob = model.predict_proba(X)[0][1]
-            label = 'spam' if prob >= 0.5 else 'ham'
-            result_dict = {
-                'label': label,
-                'prob_spam': float(prob),
-                'spam_words': found_spam_words,
-                'confidence': float(prob) if label == 'spam' else float(1 - prob)
-            }
-        else:
-            prediction = int(model.predict(X)[0])
-            label = 'spam' if prediction == 1 else 'ham'
-            result_dict = {
-                'label': label,
-                'spam_words': found_spam_words
-            }
+        prob_spam = 0.5
+        if vect is not None and model is not None and clean:
+            try:
+                # Transform and predict
+                X = vect.transform([clean])
+                if hasattr(model, 'predict_proba'):
+                    prob_spam = float(model.predict_proba(X)[0][1])
+                else:
+                    pred = model.predict(X)[0]
+                    prob_spam = 0.9 if pred in [1, 'spam'] else 0.1
+                
+                # Update result_dict with model results
+                result_dict['prob_spam'] = prob_spam
+                result_dict['label'] = 'spam' if prob_spam > 0.5 else 'ham'
+                result_dict['confidence'] = prob_spam if prob_spam > 0.5 else 1 - prob_spam
+            except Exception as e:
+                logger.error(f"Model prediction failed: {str(e)}")
         
         # Add advanced features if enabled
+        advanced_spam_score = 0.0
         if use_advanced_features:
+            reputation = {}
+            header_features = {}
+            url_analysis = {}
+            header_analysis = {'status': 'failed'}
+            
             try:
                 # Analyze complete email headers (RFC 5322 compliant)
                 header_analysis = header_analyzer.analyze_complete(text)
@@ -140,7 +196,7 @@ def predict(text: str, use_advanced_features: bool = True) -> Dict[str, Any]:
                         'is_suspicious': header_analysis.get('is_suspicious')
                     }
                 
-                # Extract and analyze headers (legacy method)
+                # Legacy header extraction
                 headers = header_extractor.extract_from_text(text)
                 header_features = header_extractor.extract_features(text)
                 result_dict['headers'] = headers
@@ -156,26 +212,38 @@ def predict(text: str, use_advanced_features: bool = True) -> Dict[str, Any]:
                 url_analysis = url_analyzer.analyze_urls(text)
                 result_dict['url_analysis'] = url_analysis
                 
-                # Compute advanced spam score (weighted combination)
+                # Calculate advanced spam score (weighted combination)
                 advanced_spam_score = _calculate_advanced_spam_score(
                     header_features,
                     reputation,
                     url_analysis,
-                    header_analysis if header_analysis.get('status') == 'success' else None
+                    header_analysis if (header_analysis and header_analysis.get('status') == 'success') else {}
                 )
                 result_dict['advanced_spam_score'] = advanced_spam_score
-                
-                # If advanced features suggest high spam, adjust prediction
-                if use_advanced_features and advanced_spam_score > 0.7:
-                    if result_dict.get('prob_spam', 0.5) < 0.7:
-                        logger.info(f'Advanced features boosted spam prediction')
-                        result_dict['label'] = 'spam'
-                        result_dict['prob_spam'] = min(0.75, result_dict.get('prob_spam', 0.5) + 0.2)
-                        
             except Exception as e:
                 logger.warning(f'Error computing advanced features: {str(e)}')
-                # Continue prediction without advanced features
                 pass
+        
+        # Override Logic (Always evaluate heuristics)
+        is_spam_override = (advanced_spam_score >= 0.32) or heuristic_spam
+        
+        if is_spam_override:
+            logger.info(f'Override triggered (score: {advanced_spam_score:.2f}, heuristic: {heuristic_spam})')
+            result_dict['label'] = 'spam'
+            
+            # Boost confidence
+            current_prob = float(result_dict.get('prob_spam', 0.5))
+            if heuristic_spam:
+                result_dict['prob_spam'] = min(0.99, max(0.92, current_prob + 0.7))
+            else:
+                result_dict['prob_spam'] = min(0.98, max(0.80, current_prob + 0.5))
+            
+            result_dict['confidence'] = result_dict['prob_spam']
+            
+            if heuristic_reasons:
+                if not isinstance(result_dict.get('explanation'), list):
+                    result_dict['explanation'] = []
+                result_dict['explanation'].extend(heuristic_reasons)
         
         return result_dict
             
@@ -205,19 +273,16 @@ def _calculate_advanced_spam_score(
     Returns:
         Composite spam score (0.0-1.0)
     """
-    score = 0.0
-    weight_sum = 0.0
+    scores = []
     
-    # Header analysis contribution (25% weight) - RFC 5322 validation
+    # Header analysis (RFC 5322 validation)
     if header_analysis and header_analysis.get('status') == 'success':
         auth_score = header_analysis.get('authentication', {}).get('overall_score', 0)
         phishing_score = header_analysis.get('phishing_analysis', {}).get('phishing_score', 0)
-        # High phishing/auth failure = high spam score
         header_auth_score = (1.0 - auth_score) * 0.5 + phishing_score * 0.5
-        score += header_auth_score * 0.25
-        weight_sum += 0.25
+        scores.append(header_auth_score)
     
-    # Header features contribution (30% weight)
+    # Header features
     if header_features:
         header_score = (
             header_features.get('subject_spam_score', 0) * 0.4 +
@@ -225,31 +290,39 @@ def _calculate_advanced_spam_score(
             header_features.get('subject_urgency_score', 0) * 0.2 +
             header_features.get('suspicious_sender_score', 0) * 0.1
         )
-        score += header_score * 0.3
-        weight_sum += 0.3
+        scores.append(header_score)
     
-    # Sender reputation contribution (25% weight)
+    # Sender reputation
     if reputation:
         rep_score = 1.0 - reputation.get('reputation_score', 0.5)
-        score += rep_score * 0.25
-        weight_sum += 0.25
+        scores.append(rep_score)
     
-    # URL analysis contribution (20% weight)
+    # URL analysis (Heavily weighted)
     if url_analysis:
         url_score = 0.0
-        if url_analysis.get('has_shortened_url'):
-            url_score += 0.3
-        if url_analysis.get('has_ip_url'):
-            url_score += 0.4
-        if url_analysis.get('suspicious_url_count', 0) > 0:
-            url_score += 0.2
-        score += url_score * 0.2
-        weight_sum += 0.2
+        if url_analysis.get('has_shortened_url'): url_score += 0.4
+        if url_analysis.get('has_ip_url'): url_score += 0.5
+        if url_analysis.get('has_suspicious_tld'): url_score += 0.4
+        if url_analysis.get('has_many_urls'): url_score += 0.3
+        if url_analysis.get('has_long_url'): url_score += 0.2
+            
+        susp_count = url_analysis.get('suspicious_url_count', 0)
+        if susp_count > 0:
+            url_score += min(susp_count * 0.15, 0.6)
+            
+        scores.append(min(url_score, 1.0))
     
-    # Normalize score
-    if weight_sum > 0:
-        return min(score / weight_sum, 1.0)
-    return 0.0
+    if not scores:
+        return 0.0
+        
+    # Logic: Prioritize the HIGHEST risk signal found rather than averaging
+    # This prevents 'safe' signals from diluting a single very dangerous signal
+    max_signal = max(scores)
+    avg_signal = sum(scores) / len(scores)
+    
+    # Use 70% of the strongest signal + 30% of the average
+    final_score = (0.7 * max_signal) + (0.3 * avg_signal)
+    return min(final_score, 1.0)
 
 
 def predict_with_explanation(text: str) -> Dict[str, Any]:

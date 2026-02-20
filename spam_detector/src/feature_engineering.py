@@ -24,7 +24,9 @@ class EmailHeaderExtractor:
         'urgent', 'act', 'now', 'free', 'money', 'click', 'congratulations',
         'winner', 'prize', 'claim', 'verify', 'confirm', 'limited', 'offer',
         'expire', 'expired', 'exclusive', 'alert', 'urgent action', 'important',
-        'update', 're-activate', 're-confirm', 'guaranteed', 'risk free'
+        'update', 're-activate', 're-confirm', 'guaranteed', 'risk free',
+        'loan', 'debt', 'cash', 'reward', 'gift', 'bonus', 'crypto', 'bitcoin',
+        'investment', 'profit', 'bank', 'account', 'security', 'suspended'
     }
 
     # Common spam sender patterns
@@ -53,6 +55,7 @@ class EmailHeaderExtractor:
             Dict with extracted header information
         """
         try:
+            # First try standard parser patterns
             headers = {
                 'subject': self._extract_subject(email_text),
                 'from': self._extract_from(email_text),
@@ -60,10 +63,23 @@ class EmailHeaderExtractor:
                 'reply_to': self._extract_reply_to(email_text),
                 'date': self._extract_date(email_text),
             }
+            
+            # If all are empty, the email might be just the body or improperly formatted
+            # Attempt a more aggressive global search
+            if not any(headers.values()):
+                logger.debug("Standard header extraction failed, attempting fallback regex")
+                headers['subject'] = self._fallback_extract(email_text, r'(?:subject|re|fwd):\s*(.+)')
+                headers['from'] = self._fallback_extract(email_text, r'(?:from|sender|sent by):\s*(.+)')
+                
             return headers
         except Exception as e:
             logger.warning(f'Error extracting headers: {str(e)}')
             return {}
+
+    def _fallback_extract(self, text: str, pattern: str) -> str:
+        """Global search fallback for headers embedded in body."""
+        match = re.search(pattern, text, re.IGNORECASE)
+        return match.group(1).strip() if match else ""
 
     def _extract_subject(self, text: str) -> str:
         """Extract Subject field."""
@@ -361,39 +377,66 @@ class EmailUrlExtractor:
 
         Spam indicators:
         - Shortened URLs
-        - URL doesn't match link text
-        - Multiple suspicious URLs
+        - Suspicious TLDs
+        - Multiple URLs
         - IP-based URLs
-
-        Args:
-            text (str): Email content
-
-        Returns:
-            Dict with URL analysis
+        - Long URLs
+        - Suspicious keywords
         """
         urls = self.extract_urls(text)
         analysis = {
             'url_count': len(urls),
             'has_shortened_url': False,
             'has_ip_url': False,
+            'has_suspicious_tld': False,
+            'has_many_urls': len(urls) > 3,
+            'has_long_url': False,
             'suspicious_url_count': 0,
             'urls': urls
         }
 
-        # Check for shortened URLs
-        shortened_domains = ['bit.ly', 'tinyurl', 'short.link', 'goo.gl']
-        for url in urls:
-            if any(domain in url.lower() for domain in shortened_domains):
-                analysis['has_shortened_url'] = True
-            
-            # Check for IP-based URLs
-            if re.search(r'https?://\d+\.\d+\.\d+\.\d+', url):
-                analysis['has_ip_url'] = True
-            
-            # Check for suspicious patterns
-            if 'verify' in url or 'confirm' in url or 'update' in url or 'claim' in url:
-                analysis['suspicious_url_count'] += 1
+        suspicious_count = 0
+        has_shortened = False
+        has_ip = False
+        has_susp_tld = False
+        has_long = False
 
+        shortened_domains = ['bit.ly', 'tinyurl', 'short.link', 'goo.gl', 't.co', 'ow.ly']
+        suspicious_tlds = ['.tk', '.ml', '.ga', '.cf', '.gq', '.xyz', '.top', '.pw', '.win', '.bid', '.loan']
+        
+        for url in urls:
+            url_lower = url.lower()
+            
+            if any(domain in url_lower for domain in shortened_domains):
+                has_shortened = True
+                suspicious_count += 1
+            
+            if re.search(r'https?://\d+\.\d+\.\d+\.\d+', url):
+                has_ip = True
+                suspicious_count += 1
+            
+            if any(tld in url_lower for tld in suspicious_tlds):
+                has_susp_tld = True
+                suspicious_count += 1
+
+            if len(url) > 100:
+                has_long = True
+                suspicious_count += 1
+            
+            spam_keywords = ['verify', 'confirm', 'update', 'claim', 'login', 'secure', 'account', 'banking', 'prize', 'gift']
+            if any(keyword in url_lower for keyword in spam_keywords):
+                suspicious_count += 1
+
+        analysis = {
+            'url_count': len(urls),
+            'has_shortened_url': has_shortened,
+            'has_ip_url': has_ip,
+            'has_suspicious_tld': has_susp_tld,
+            'has_many_urls': len(urls) > 3,
+            'has_long_url': has_long,
+            'suspicious_url_count': suspicious_count,
+            'urls': urls
+        }
         return analysis
 
 
