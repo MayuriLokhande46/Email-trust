@@ -1,248 +1,378 @@
 import streamlit as st
-import nltk
-import time
 import pandas as pd
 import io
 import re
+import requests
+import os
+import time
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
-from preprocess import clean_text
-from predict import predict
-from database import init_db, save_prediction, get_all_predictions
-import authentication as auth
+import sys
+
+# Ensure current directory is in path for local imports
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+try:
+    from spam_detector.src.predict import predict
+except ImportError:
+    try:
+        from predict import predict
+    except ImportError:
+        predict = None # Fallback if API only
+
+# --- Configuration ---
+API_URL = os.getenv("API_URL", "http://localhost:8000")
 
 # --- Initial Setup ---
-st.set_page_config(page_title="Spam Detector", page_icon="📧", layout="wide")
+st.set_page_config(page_title="Email Spam Detection", page_icon="📧")
 
-# Initialize databases
-# For prediction history
-init_db() 
-# For user authentication
-user_db_conn = auth.create_connection()
-auth.create_table(user_db_conn)
+# Custom CSS for Premium Look
+st.markdown("""
+<style>
+    /* Main Background */
+    .stApp {
+        background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+        color: #ffffff;
+    }
+    
+    /* Center Authentication Card */
+    .auth-container {
+        max-width: 500px;
+        margin: 50px auto;
+        padding: 40px;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* Headers */
+    h1, h2, h3 {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700 !important;
+        background: linear-gradient(90deg, #00f2fe 0%, #4facfe 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    /* Buttons */
+    .stButton > button {
+        border-radius: 10px !important;
+        transition: all 0.3s ease !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.5px !important;
+        padding: 10px 25px !important;
+    }
+    
+    .stButton > button:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4) !important;
+    }
+    
+    /* Inputs */
+    .stTextInput > div > div > input, .stTextArea > div > div > textarea {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        color: white !important;
+        border-radius: 10px !important;
+    }
+    
+    /* Metric Card */
+    [data-testid="stMetricValue"] {
+        color: #00f2fe !important;
+        font-size: 2rem !important;
+    }
+    
+    /* Highlight Spam */
+    mark {
+        background-color: #ff4b4b;
+        color: white;
+        padding: 2px 4px;
+        border-radius: 4px;
+    }
+
+    /* Link Safety Classes */
+    .link-safe { color: #00ff00; font-weight: bold; }
+    .link-danger { color: #ff4b4b; font-weight: bold; }
+</style>
+""", unsafe_allow_html=True)
 
 # Initialize session state for authentication
 if 'authenticated' not in st.session_state:
     st.session_state['authenticated'] = False
 if 'username' not in st.session_state:
     st.session_state['username'] = ''
-
-# --- NLTK Resource Download ---
-# Moved to a function to be more organized
-@st.cache_resource
-def download_nltk_data():
-    try:
-        nltk.data.find('tokenizers/punkt')
-    except LookupError:
-        nltk.download('punkt')
-    try:
-        nltk.data.find('corpora/stopwords')
-    except LookupError:
-        nltk.download('stopwords')
-    try:
-        nltk.data.find('corpora/wordnet')
-    except LookupError:
-        nltk.download('wordnet')
-download_nltk_data()
-
+if 'token' not in st.session_state:
+    st.session_state['token'] = ''
+if 'auth_mode' not in st.session_state:
+    st.session_state['auth_mode'] = 'Signup'
 
 # --- Core App Functions ---
 @st.cache_data
 def convert_df_to_csv(df):
     return df.to_csv(index=False).encode('utf-8')
 
-def generate_word_cloud(text):
-    wordcloud = WordCloud(width=800, height=400, background_color="black", colormap='Reds', max_words=100).generate(text)
-    fig, ax = plt.subplots()
-    ax.imshow(wordcloud, interpolation='bilinear')
-    ax.axis("off")
-    st.pyplot(fig)
+def make_api_request(method, endpoint, data=None, params=None):
+    headers = {}
+    if st.session_state['token']:
+        headers['Authorization'] = f"Bearer {st.session_state['token']}"
+    
+    url = f"{API_URL}{endpoint}"
+    try:
+        if method == 'GET':
+            response = requests.get(url, headers=headers, params=params)
+        elif method == 'POST':
+            response = requests.post(url, headers=headers, json=data)
+        
+        if response.status_code in [200, 201]:
+            return response.json()
+        elif response.status_code == 401:
+            st.error("Session expired. Please login again.")
+            st.session_state['authenticated'] = False
+            st.session_state['token'] = ''
+            st.rerun()
+        else:
+            st.error(f"API Error ({endpoint}): {response.status_code}")
+            return None
+    except Exception as e:
+        st.error(f"Connection Error: {str(e)}")
+        return None
 
 # --- Main Spam Detector App ---
 def spam_detector_app():
     # Sidebar for extra info
     with st.sidebar:
-        st.title("ℹ️ Info")
-        with st.expander("ℹ️ About this App"):
-            st.write("This Machine Learning model analyzes emails to detect if they are Spam or Safe (Ham).")
+        st.markdown(f"### 👤 {st.session_state['username']}")
+        st.info("Role: Authorized User")
         st.markdown("---")
+        
+        if st.button("🚪 Logout", use_container_width=True):
+            st.session_state['authenticated'] = False
+            st.session_state['username'] = ''
+            st.session_state['token'] = ''
+            st.rerun()
 
-    st.title("📧 Email Spam Detector")
-    st.markdown("Paste your email text below and click the **Analyze** button.")
+    st.title("Email Spam Detection")
 
-    user_input = st.text_area("Email Content:", height=250, placeholder="Paste text here...")
-    analyze_button = st.button("🔍 Analyze Email", type="primary")
+    col1, col2 = st.columns([2, 1])
 
-    st.markdown("---")
+    with col1:
+        st.markdown("### 🔍 Analyze Single Email")
+        user_input = st.text_area("Email Content:", height=300, placeholder="Paste email body here...")
+        analyze_button = st.button("🚀 Run Analysis", type="primary", use_container_width=True)
 
-    # --- Result Display ---
-    if analyze_button:
-        if user_input.strip():
-            with st.spinner("Analyzing..."):
-                time.sleep(0.5)  # Visual effect
-                result = predict(user_input)
+    with col2:
+        st.markdown("### 📊 Analysis Results")
+        if analyze_button and user_input.strip():
+            # No spinner as requested: "ai thinking aisa show nhi hona chhaiye"
+            result = make_api_request('POST', '/predict', data={"text": user_input})
+            
+            if result:
                 label = result['label']
                 prob_spam = result.get('prob_spam', 0)
                 spam_words = result.get('spam_words', [])
+                url_analysis = result.get('url_analysis', {})
 
-            result_container = st.container(border=True)
-            with result_container:
+                # Result Status
                 if label == 'spam':
-                    st.error("🚨 **SPAM DETECTED!**", icon="🚨")
-                    st.metric(label="Confidence", value=f"{prob_spam*100:.2f}%")
+                    st.error("🚨 **SPAM DETECTED**", icon="🚨")
+                    st.metric("Spam Confidence", f"{prob_spam*100:.1f}%")
                     st.progress(float(prob_spam))
-                    save_prediction(user_input, "spam", prob_spam)
-
-                    if spam_words:
-                        st.markdown("---")
-                        st.subheader("Highlight Spam Words:")
-                        highlighted_text = user_input
-                        for word in spam_words:
-                            highlighted_text = re.sub(r'\b' + re.escape(word) + r'\b', f'<mark>{word}</mark>', highlighted_text, flags=re.IGNORECASE)
-                        st.markdown(highlighted_text, unsafe_allow_html=True)
+                    
+                    # Show heuristic explanations if any
+                    explanations = result.get('explanation', [])
+                    if explanations:
+                        st.info("**Heuristic Analysis Signals:**\n" + "\n".join([f"- {e}" for e in explanations]))
                 else:
                     prob_ham = 1 - prob_spam
-                    st.success("✅ **HAM (Safe Email)**", icon="✅")
-                    st.metric(label="Confidence", value=f"{prob_ham*100:.2f}%")
+                    st.success("✅ **SAFE EMAIL**", icon="✅")
+                    st.metric("Safe Confidence", f"{prob_ham*100:.1f}%")
                     st.progress(float(prob_ham))
-                    save_prediction(user_input, "ham", prob_ham)
+
+                # Display detailed signals
+                with st.expander("📊 Detailed Spam Signal Analysis"):
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        adv_score = result.get('advanced_spam_score', 0)
+                        st.write("**Advanced Risk Score:**")
+                        st.write(f"{adv_score:.2f} / 1.0")
+                        if adv_score > 0.4:
+                            st.warning("⚠️ High structural risk detected")
+                    
+                    with col2:
+                        st.write("**Language Detected:**")
+                        st.code(result.get('language', 'en').upper())
+                
+                # Show full response for verification
+                with st.expander("Details"):
+                    st.json(result)
+                
+                # Link Verification Section
+                st.markdown("---")
+                st.markdown("### 🔗 Link Verification")
+                if url_analysis and url_analysis.get('urls'):
+                    urls = url_analysis.get('urls', [])
+                    st.write(f"Found {len(urls)} links in the email.")
+                    
+                    for url in urls:
+                        is_suspicious = False
+                        reasons = []
+                        
+                        # Use flags from enhanced url_analyzer
+                        url_lower = url.lower()
+                        if any(s in url_lower for s in ['bit.ly', 'tinyurl', 't.co', 'goo.gl', 'ow.ly']):
+                            is_suspicious = True
+                            reasons.append("Shortened URL detected")
+                        if re.match(r'https?://\d+\.\d+\.\d+\.\d+', url):
+                            is_suspicious = True
+                            reasons.append("IP-based URL detected")
+                        
+                        # New flags
+                        suspicious_tlds = ['.tk', '.ml', '.ga', '.cf', '.gq', '.xyz', '.top', '.pw', '.win', '.bid', '.loan']
+                        if any(tld in url_lower for tld in suspicious_tlds):
+                            is_suspicious = True
+                            reasons.append(f"Suspicious TLD ({url_lower.split('.')[-1]})")
+                        
+                        if len(url) > 100:
+                            is_suspicious = True
+                            reasons.append("Highly obfuscated long URL")
+                            
+                        spam_keywords = ['verify', 'confirm', 'update', 'claim', 'login', 'secure', 'account', 'banking', 'prize', 'gift']
+                        if any(k in url_lower for k in spam_keywords):
+                            is_suspicious = True
+                            reasons.append("Suspicious keyword in URL")
+                            
+                        if is_suspicious:
+                            st.markdown(f"❌ `{url}` : <span class='link-danger'>Suspicious / Harmful</span>", unsafe_allow_html=True)
+                            for r in reasons:
+                                st.caption(f"Reason: {r}")
+                        else:
+                            st.markdown(f"✅ `{url}` : <span class='link-safe'>Safe</span>", unsafe_allow_html=True)
+                else:
+                    st.info("No links found in this email.")
+                
+                # Highlight Spam Words
+                if spam_words and label == 'spam':
+                    st.markdown("---")
+                    st.markdown("**Highlighted Spam Signals:**")
+                    highlighted_text = user_input
+                    for word in spam_words[:15]: # Show more words
+                        highlighted_text = re.sub(r'\b' + re.escape(word) + r'\b', f'<mark>{word}</mark>', highlighted_text, flags=re.IGNORECASE)
+                    st.markdown(f'<div style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 5px; color: white;">{highlighted_text}</div>', unsafe_allow_html=True)
         else:
-            st.warning("👈 Please enter some text to analyze.", icon="⚠️")
+            st.write("Results will appear here after analysis.")
 
     st.markdown("---")
 
     # --- Bulk Analysis Feature ---
-    st.header("📧 Bulk Email Analysis")
+    st.header("📂 Bulk Email Analysis")
+    uploaded_files = st.file_uploader("Upload CSV or TXT files for batch analysis", type=['csv', 'txt'], accept_multiple_files=True)
 
-    uploaded_file = st.file_uploader("Choose a file", type=['csv', 'txt'])
-
-    if uploaded_file is not None:
-        try:
-            stringio = io.StringIO(uploaded_file.getvalue().decode("utf-8"))
-            emails = []
-            
-            if uploaded_file.name.endswith('.csv'):
-                df = pd.read_csv(stringio)
-                email_col = None
-                for col in df.columns:
-                    if 'email' in col.lower() or 'text' in col.lower():
-                        email_col = col
-                        break
-                if email_col:
-                    emails = df[email_col].dropna().tolist()
-                    st.info(f"Found {len(emails)} emails in column '{email_col}'.")
-                else:
-                    st.error("Could not find a column with 'email' or 'text' in the CSV.")
-
-            elif uploaded_file.name.endswith('.txt'):
-                emails = [line.strip() for line in stringio.readlines() if line.strip()]
-                st.info(f"Found {len(emails)} emails in the text file.")
-
-            if emails:
-                results = []
-                progress_bar = st.progress(0)
-                status_text = st.empty()
+    if uploaded_files:
+        for uploaded_file in uploaded_files:
+            try:
+                stringio = io.StringIO(uploaded_file.getvalue().decode("utf-8"))
+                emails = []
                 
-                for i, email_text in enumerate(emails):
-                    prediction = predict(email_text)
-                    results.append({
-                        'Email': email_text,
-                        'Prediction': prediction['label'],
-                        'Confidence (Spam)': f"{prediction.get('prob_spam', 0)*100:.2f}%"
-                    })
-                    progress_percentage = (i + 1) / len(emails)
-                    progress_bar.progress(progress_percentage)
-                    status_text.text(f"Analyzing email {i+1}/{len(emails)}")
+                if uploaded_file.name.endswith('.csv'):
+                    df_up = pd.read_csv(stringio)
+                    email_col = next((c for c in df_up.columns if any(k in c.lower() for k in ['email', 'text'])), None)
+                    if email_col:
+                        emails = df_up[email_col].dropna().tolist()
+                    else:
+                        st.error(f"Could not find email/text column in {uploaded_file.name}")
+                elif uploaded_file.name.endswith('.txt'):
+                    emails = [line.strip() for line in stringio.readlines() if line.strip()]
 
-                progress_bar.empty()
-                status_text.empty()
+                if emails:
+                    if st.button(f"Analyze {len(emails)} Emails from {uploaded_file.name}"):
+                        batch_emails = emails[:100]
+                        response = make_api_request('POST', '/batch_predict', data={"texts": batch_emails})
+                        if response:
+                            results = response.get('results', [])
+                            final_data = []
+                            for i, res in enumerate(results):
+                                final_data.append({
+                                    'Email': batch_emails[i][:50] + "...",
+                                    'Status': res.get('label', 'Error').upper(),
+                                    'Spam Score': f"{res.get('prob_spam', 0)*100:.1f}%"
+                                })
+                            st.table(pd.DataFrame(final_data))
 
-                results_df = pd.DataFrame(results)
-                st.subheader("Analysis Results")
-                st.dataframe(results_df)
-
-                csv_data = convert_df_to_csv(results_df)
-
-                st.download_button(
-                    label="📥 Download Results as CSV",
-                    data=csv_data,
-                    file_name='spam_analysis_results.csv',
-                    mime='text/csv',
-                )
-
-        except Exception as e:
-            st.error(f"An error occurred while processing the file: {e}")
+            except Exception as e:
+                st.error(f"Error processing {uploaded_file.name}: {e}")
 
     st.markdown("---")
 
     # --- Prediction History ---
-    st.header("📧 Prediction History")
-
+    st.header("🕒 Prediction History")
     show_history = st.toggle("Show Full History")
-
     if show_history:
-        history_records = get_all_predictions()
-        if history_records:
-            history_df = pd.DataFrame(history_records, columns=['Timestamp', 'Email Content', 'Prediction', 'Confidence'])
-            history_df['Confidence'] = history_df['Confidence'].apply(lambda x: f"{x*100:.2f}%")
-            st.dataframe(history_df, use_container_width=True)
-        else:
-            st.info("No prediction history found.")
+        history_data = make_api_request('GET', '/history', params={"limit": 50})
+        if history_data and 'history' in history_data:
+            records = history_data['history']
+            if records:
+                # Use actual keys from API: timestamp, email_content, prediction, confidence
+                df_hist = pd.DataFrame(records)
+                df_hist.columns = ['Time', 'Email Preview', 'Result', 'Confidence']
+                st.dataframe(df_hist, use_container_width=True)
+            else:
+                st.info("No history found.")
 
 # --- Authentication Pages ---
 def login_page():
-    st.title("Welcome to the Spam Detector")
-    st.write("Please sign up or log in to continue.")
+    st.markdown('<div class="auth-container">', unsafe_allow_html=True)
+    
+    cols = st.columns(2)
+    if cols[0].button("📝 Sign Up", use_container_width=True, type="primary" if st.session_state['auth_mode'] == 'Signup' else "secondary"):
+        st.session_state['auth_mode'] = 'Signup'
+        st.rerun()
+    if cols[1].button("🔑 Login", use_container_width=True, type="primary" if st.session_state['auth_mode'] == 'Login' else "secondary"):
+        st.session_state['auth_mode'] = 'Login'
+        st.rerun()
 
-    tabs = st.tabs(["Sign Up", "Login"])
-
-    # Sign Up Tab
-    with tabs[0]:
+    if st.session_state['auth_mode'] == 'Signup':
+        st.subheader("Create Account")
         with st.form("signup_form"):
-            st.subheader("Create a New Account")
-            new_username = st.text_input("Choose a Username", key="signup_username")
-            new_password = st.text_input("Choose a Password", type="password", key="signup_password")
-            confirm_password = st.text_input("Confirm Password", type="password", key="signup_confirm_password")
-            signup_button = st.form_submit_button("Sign Up")
-
-            if signup_button:
-                if not new_username or not new_password:
-                    st.warning("Username and password cannot be empty.")
-                elif new_password != confirm_password:
-                    st.error("Passwords do not match.")
+            new_user = st.text_input("Username")
+            new_pass = st.text_input("Password", type="password")
+            conf_pass = st.text_input("Confirm Password", type="password")
+            if st.form_submit_button("Join Now", use_container_width=True):
+                if new_pass != conf_pass:
+                    st.error("Passwords don't match")
+                elif not new_user:
+                    st.warning("Username required")
                 else:
-                    if auth.add_user(user_db_conn, new_username, new_password):
-                        st.success("Account created successfully! Please go to the Login tab to log in.")
+                    res = make_api_request('POST', '/register', data={"username": new_user, "password": new_pass})
+                    if res:
+                        st.success("🎉 Welcome! Redirecting to login...")
+                        time.sleep(1.5)
+                        st.session_state['auth_mode'] = 'Login'
+                        st.rerun()
                     else:
-                        st.error("Username already exists. Please choose another one.")
-
-    # Login Tab
-    with tabs[1]:
+                        st.error("Registration failed. Try a different username.")
+    else:
+        st.subheader("Welcome Back")
         with st.form("login_form"):
-            st.subheader("Login")
-            username = st.text_input("Username", key="login_username")
-            password = st.text_input("Password", type="password", key="login_password")
-            submit_button = st.form_submit_button("Login")
-
-            if submit_button:
-                user = auth.get_user(user_db_conn, username)
-                if user and auth.check_password(user[2], password):
+            user = st.text_input("Username")
+            pw = st.text_input("Password", type="password")
+            if st.form_submit_button("Sign In", use_container_width=True):
+                res = make_api_request('POST', '/login', data={"username": user, "password": pw})
+                if res and 'access_token' in res:
                     st.session_state['authenticated'] = True
-                    st.session_state['username'] = username
-                    st.rerun() 
+                    st.session_state['username'] = user
+                    st.session_state['token'] = res['access_token']
+                    st.success("Success! Entering Dashboard...")
+                    time.sleep(1)
+                    st.rerun()
                 else:
-                    st.error("Invalid username or password.")
+                    st.error("Login failed. Check username/password.")
+                    
+    st.markdown('</div>', unsafe_allow_html=True)
 
-
-# --- Main Control Flow ---
+# --- Main Flow ---
 if st.session_state['authenticated']:
-    with st.sidebar:
-        st.success(f"Logged in as **{st.session_state['username']}**")
-        if st.button("Logout"):
-            st.session_state['authenticated'] = False
-            st.session_state['username'] = ''
-            st.rerun() # Rerun to show the login page
     spam_detector_app()
 else:
     login_page()
-

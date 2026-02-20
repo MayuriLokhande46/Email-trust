@@ -8,8 +8,12 @@ from sklearn.metrics import classification_report
 import joblib
 import json
 
-from spam_detector.src.preprocess import clean_text
-from spam_detector.src.features import build_vectorizer, save_vectorizer
+try:
+    from spam_detector.src.preprocess import clean_text
+    from spam_detector.src.features import build_vectorizer, save_vectorizer
+except ImportError:
+    from preprocess import clean_text
+    from features import build_vectorizer, save_vectorizer
 
 ROOT = os.path.dirname(os.path.dirname(__file__))
 DATA_PATH = os.path.join(ROOT, 'data', 'spam.csv')

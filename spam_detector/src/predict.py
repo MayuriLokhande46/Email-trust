@@ -4,13 +4,22 @@ import joblib
 import json
 import logging
 from typing import Dict, Any
-from spam_detector.src.preprocess import clean_text
-from spam_detector.src.features import load_vectorizer
-from spam_detector.src.feature_engineering import (
-    EmailHeaderExtractor, SenderReputationChecker, EmailUrlExtractor
-)
-from spam_detector.src.email_headers import CompleteHeaderAnalyzer
-from spam_detector.src.multilingual import detect_language, translate_to_english
+try:
+    from spam_detector.src.preprocess import clean_text
+    from spam_detector.src.features import load_vectorizer
+    from spam_detector.src.feature_engineering import (
+        EmailHeaderExtractor, SenderReputationChecker, EmailUrlExtractor
+    )
+    from spam_detector.src.email_headers import CompleteHeaderAnalyzer
+    from spam_detector.src.multilingual import detect_language, translate_to_english
+except ImportError:
+    from preprocess import clean_text
+    from features import load_vectorizer
+    from feature_engineering import (
+        EmailHeaderExtractor, SenderReputationChecker, EmailUrlExtractor
+    )
+    from email_headers import CompleteHeaderAnalyzer
+    from multilingual import detect_language, translate_to_english
 
 # Set up logging
 logger = logging.getLogger(__name__)
