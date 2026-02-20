@@ -3,6 +3,19 @@ import subprocess
 import sys
 import os
 import time
+import nltk
+
+# --- NLTK Data Download ---
+@st.cache_resource
+def download_nltk_data():
+    try:
+        nltk.download('punkt')
+        nltk.download('stopwords')
+        nltk.download('wordnet')
+        nltk.download('omw-1.4')
+        nltk.download('punkt_tab')
+    except Exception as e:
+        print(f"Error downloading NLTK data: {e}")
 
 # --- Backend Startup Logic ---
 @st.cache_resource
@@ -13,7 +26,6 @@ def start_backend():
     env["PYTHONPATH"] = root_dir
     
     # Start the backend server
-    # Correct path to api.py is spam_detector/src/api.py
     process = subprocess.Popen(
         [sys.executable, "-m", "uvicorn", "spam_detector.src.api:app", "--host", "0.0.0.0", "--port", "8000"],
         env=env,
@@ -23,7 +35,8 @@ def start_backend():
     time.sleep(5)
     return process
 
-# Ensure backend starts
+# Ensure backend and NLTK are ready only once
+download_nltk_data()
 start_backend()
 
 # Add path for internal imports
