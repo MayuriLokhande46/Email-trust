@@ -9,16 +9,24 @@ from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 import sys
 
-# Ensure current directory is in path for local imports
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+# Ensure project root is in path for absolute imports
+# src -> spam_detector -> root
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if project_root not in sys.path:
+    sys.path.append(project_root)
+if current_dir not in sys.path:
+    sys.path.append(current_dir)
 
 try:
-    from spam_detector.src.predict import predict
+    import spam_detector.src.predict as predict_module
+    predict = predict_module.predict
 except ImportError:
     try:
-        from predict import predict
+        import predict as predict_module
+        predict = predict_module.predict
     except ImportError:
-        predict = None # Fallback if API only
+        predict = None
 
 # --- Configuration ---
 API_URL = os.getenv("API_URL", "http://localhost:8000")

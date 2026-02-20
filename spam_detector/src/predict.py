@@ -4,22 +4,44 @@ import joblib
 import json
 import logging
 from typing import Dict, Any
+import sys
+
+# Ensure project root is in path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if project_root not in sys.path:
+    sys.path.append(project_root)
+if current_dir not in sys.path:
+    sys.path.append(current_dir)
+
 try:
-    from spam_detector.src.preprocess import clean_text
-    from spam_detector.src.features import load_vectorizer
-    from spam_detector.src.feature_engineering import (
-        EmailHeaderExtractor, SenderReputationChecker, EmailUrlExtractor
-    )
-    from spam_detector.src.email_headers import CompleteHeaderAnalyzer
-    from spam_detector.src.multilingual import detect_language, translate_to_english
+    import spam_detector.src.preprocess as pre
+    clean_text = pre.clean_text
+    import spam_detector.src.features as feats
+    load_vectorizer = feats.load_vectorizer
+    import spam_detector.src.feature_engineering as fe
+    EmailHeaderExtractor = fe.EmailHeaderExtractor
+    SenderReputationChecker = fe.SenderReputationChecker
+    EmailUrlExtractor = fe.EmailUrlExtractor
+    import spam_detector.src.email_headers as eh
+    CompleteHeaderAnalyzer = eh.CompleteHeaderAnalyzer
+    import spam_detector.src.multilingual as ml
+    detect_language = ml.detect_language
+    translate_to_english = ml.translate_to_english
 except ImportError:
-    from preprocess import clean_text
-    from features import load_vectorizer
-    from feature_engineering import (
-        EmailHeaderExtractor, SenderReputationChecker, EmailUrlExtractor
-    )
-    from email_headers import CompleteHeaderAnalyzer
-    from multilingual import detect_language, translate_to_english
+    import preprocess as pre
+    clean_text = pre.clean_text
+    import features as feats
+    load_vectorizer = feats.load_vectorizer
+    import feature_engineering as fe
+    EmailHeaderExtractor = fe.EmailHeaderExtractor
+    SenderReputationChecker = fe.SenderReputationChecker
+    EmailUrlExtractor = fe.EmailUrlExtractor
+    import email_headers as eh
+    CompleteHeaderAnalyzer = eh.CompleteHeaderAnalyzer
+    import multilingual as ml
+    detect_language = ml.detect_language
+    translate_to_english = ml.translate_to_english
 
 # Set up logging
 logger = logging.getLogger(__name__)

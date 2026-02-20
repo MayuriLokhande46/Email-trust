@@ -8,12 +8,28 @@ from sklearn.metrics import classification_report
 import joblib
 import json
 
+import sys
+
+# Ensure project root is in path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if project_root not in sys.path:
+    sys.path.append(project_root)
+if current_dir not in sys.path:
+    sys.path.append(current_dir)
+
 try:
-    from spam_detector.src.preprocess import clean_text
-    from spam_detector.src.features import build_vectorizer, save_vectorizer
+    import spam_detector.src.preprocess as pre
+    clean_text = pre.clean_text
+    import spam_detector.src.features as feats
+    build_vectorizer = feats.build_vectorizer
+    save_vectorizer = feats.save_vectorizer
 except ImportError:
-    from preprocess import clean_text
-    from features import build_vectorizer, save_vectorizer
+    import preprocess as pre
+    clean_text = pre.clean_text
+    import features as feats
+    build_vectorizer = feats.build_vectorizer
+    save_vectorizer = feats.save_vectorizer
 
 ROOT = os.path.dirname(os.path.dirname(__file__))
 DATA_PATH = os.path.join(ROOT, 'data', 'spam.csv')

@@ -13,6 +13,40 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, validator
 import time
+import sys
+
+# Ensure project root is in path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if project_root not in sys.path:
+    sys.path.append(project_root)
+if current_dir not in sys.path:
+    sys.path.append(current_dir)
+
+try:
+    import spam_detector.src.predict as predict_module
+    predict = predict_module.predict
+    import spam_detector.src.database as db_module
+    save_prediction = db_module.save_prediction
+    get_all_predictions = db_module.get_all_predictions
+    save_blocked = db_module.save_blocked
+    get_blocked_emails = db_module.get_blocked_emails
+    import spam_detector.src.security as sec_module
+    create_access_token = sec_module.create_access_token
+    get_current_user = sec_module.get_current_user
+    import spam_detector.src.authentication as auth
+except ImportError:
+    import predict as predict_module
+    predict = predict_module.predict
+    import database as db_module
+    save_prediction = db_module.save_prediction
+    get_all_predictions = db_module.get_all_predictions
+    save_blocked = db_module.save_blocked
+    get_blocked_emails = db_module.get_blocked_emails
+    import security as sec_module
+    create_access_token = sec_module.create_access_token
+    get_current_user = sec_module.get_current_user
+    import authentication as auth
 
 try:
     from spam_detector.src.predict import predict
