@@ -8,8 +8,8 @@ from sklearn.metrics import classification_report
 import joblib
 import json
 
-from preprocess import clean_text
-from features import build_vectorizer, save_vectorizer
+from spam_detector.src.preprocess import clean_text
+from spam_detector.src.features import build_vectorizer, save_vectorizer
 
 ROOT = os.path.dirname(os.path.dirname(__file__))
 DATA_PATH = os.path.join(ROOT, 'data', 'spam.csv')
@@ -45,6 +45,11 @@ X_text = df['text_clean'].values
 # binary label: spam=1, ham=0
 y = (df['label'].str.lower() == 'spam').astype(int).values
 
+# Ensure no empty strings are passed to the vectorizer
+non_empty_mask = [isinstance(text, str) and len(text.strip()) > 0 for text in X_text]
+X_text = X_text[non_empty_mask]
+y = y[non_empty_mask]
+
 print('Building TF-IDF vectorizer...')
 vect, X = build_vectorizer(X_text, max_features=5000)
 save_vectorizer(vect)
@@ -79,21 +84,31 @@ print('Saved model to', os.path.join(MODEL_DIR, 'spam_model.joblib'))
 pred = best_model.predict(X_test)
 print(classification_report(y_test, pred))
 
-# --- Save spam words if model is Logistic Regression ---
-if best_name == 'lr':
-    print('Saving spam words for Logistic Regression model...')
-    try:
+# --- Save spam words based on model type ---
+print('Saving spam words...')
+try:
+    if hasattr(best_model, 'feature_importances_'):
+        print('Using feature_importances_ for tree-based model.')
+        importances = best_model.feature_importances_
+        feature_names = vect.get_feature_names_out()
+        word_importances = sorted(zip(feature_names, importances), key=lambda x: x[1], reverse=True)
+        top_spam_words = [word for word, importance in word_importances[:200]]
+    elif best_name == 'lr':
+        print('Using coefficients for Logistic Regression model.')
         feature_names = vect.get_feature_names_out()
         coefs = best_model.coef_[0]
         word_coefs = sorted(zip(feature_names, coefs), key=lambda x: x[1], reverse=True)
-        
-        # Get top 200 words that are strong indicators of spam
-        top_spam_words = [word for word, coef in word_coefs if coef > 0][:200]
+        top_spam_words = [word for word, coef in word_coefs[:200]]
+    else:
+        print(f"Cannot extract spam words for model type: {best_name}")
+        top_spam_words = []
 
+    if top_spam_words:
         spam_words_path = os.path.join(MODEL_DIR, 'spam_words.json')
         with open(spam_words_path, 'w') as f:
             json.dump(top_spam_words, f)
         print(f'Saved top 200 spam words to {spam_words_path}')
-    except Exception as e:
-        print(f"Could not save spam words: {e}")
+
+except Exception as e:
+    print(f"Could not save spam words: {e}")
 

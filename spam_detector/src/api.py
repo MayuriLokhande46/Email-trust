@@ -3,6 +3,7 @@ FastAPI application for Spam Detection with JWT authentication.
 """
 
 import logging
+import os
 from typing import List, Dict, Any
 from fastapi import (
     FastAPI, HTTPException, Depends, status,
@@ -13,20 +14,26 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, validator
 import time
 
-from predict import predict
-from database import (
+from spam_detector.src.predict import predict
+from spam_detector.src.database import (
     save_prediction, get_all_predictions, 
     save_blocked, get_blocked_emails
 )
-from security import (
+from spam_detector.src.security import (
     create_access_token, get_current_user
 )
-import authentication as auth
+from spam_detector.src import authentication as auth
 
 # Set up logging
+LOG_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'logs')
+os.makedirs(LOG_DIR, exist_ok=True)
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler(os.path.join(LOG_DIR, "backend.log")),
+        logging.StreamHandler()
+    ]
 )
 logger = logging.getLogger(__name__)
 
@@ -84,6 +91,11 @@ class PredictionResult(BaseModel):
     prob_spam: float = Field(None, ge=0, le=1, description="Probability of being spam")
     confidence: float = Field(None, ge=0, le=1, description="Model confidence score")
     spam_words: List[str] = Field(default=[], description="Detected spam indicator words")
+    language: str = Field(default='en', description="Detected language of the email")
+    url_analysis: Dict[str, Any] = Field(default={}, description="URL analysis results")
+    header_analysis: Dict[str, Any] = Field(default={}, description="Header analysis results")
+    header_features: Dict[str, Any] = Field(default={}, description="Legacy header features")
+    advanced_spam_score: float = Field(default=0.0, description="Composite spam score")
 
 
 class BatchPredictionResult(BaseModel):
@@ -146,6 +158,8 @@ def register(request: LoginRequest):
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Username already exists"
             )
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Registration error: {str(e)}")
         raise HTTPException(
