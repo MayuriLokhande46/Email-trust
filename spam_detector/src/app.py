@@ -327,7 +327,7 @@ def spam_detector_app():
 
 # --- Authentication Pages ---
 def login_page():
-    st.markdown('<div class="auth-container">', unsafe_allow_html=True)
+    st.markdown('<div class="auth-container"><h1 style="text-align: center; color: #00f2fe; margin-bottom: 20px;">Email Trust</h1>', unsafe_allow_html=True)
     
     cols = st.columns(2)
     if cols[0].button("📝 Sign Up", use_container_width=True, type="primary" if st.session_state['auth_mode'] == 'Signup' else "secondary"):
