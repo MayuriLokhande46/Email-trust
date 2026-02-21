@@ -21,10 +21,12 @@ try:
     import spam_detector.src.predict as predict_module
     predict = predict_module.predict
     import spam_detector.src.authentication as auth_direct
+    import spam_detector.src.security as sec_direct
 except ImportError:
     import predict as predict_module
     predict = predict_module.predict
     import authentication as auth_direct
+    import security as sec_direct
 
 # Initialize the users table directly (independent of backend)
 try:
@@ -383,9 +385,14 @@ def login_page():
                 try:
                     db_user = auth_direct.get_user(user.strip())
                     if db_user and auth_direct.check_password(db_user[2], pw):
+                        # Generate a real JWT token so API calls (predictions etc.) work
+                        try:
+                            token = sec_direct.create_access_token({"sub": user.strip()})
+                        except Exception:
+                            token = 'local-auth'
                         st.session_state['authenticated'] = True
                         st.session_state['username'] = user.strip()
-                        st.session_state['token'] = 'local-auth'
+                        st.session_state['token'] = token
                         st.success("✅ Success! Loading Dashboard...")
                         time.sleep(1)
                         st.rerun()

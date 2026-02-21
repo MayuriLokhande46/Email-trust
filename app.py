@@ -6,7 +6,7 @@ import time
 import nltk
 
 # Set page config at the very beginning
-st.set_page_config(page_title="Email Spam Detection", page_icon="📧", layout="centered")
+st.set_page_config(page_title="Email Spam Detection", page_icon="📧", layout="wide")
 
 # --- NLTK Data Download ---
 @st.cache_resource
