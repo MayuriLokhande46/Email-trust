@@ -104,14 +104,15 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Initialize session state for authentication
-if 'authenticated' not in st.session_state:
-    st.session_state['authenticated'] = False
-if 'username' not in st.session_state:
-    st.session_state['username'] = ''
-if 'token' not in st.session_state:
-    st.session_state['token'] = ''
-if 'auth_mode' not in st.session_state:
-    st.session_state['auth_mode'] = 'Signup'
+def init_session_state():
+    if 'authenticated' not in st.session_state:
+        st.session_state['authenticated'] = False
+    if 'username' not in st.session_state:
+        st.session_state['username'] = ''
+    if 'token' not in st.session_state:
+        st.session_state['token'] = ''
+    if 'auth_mode' not in st.session_state:
+        st.session_state['auth_mode'] = 'Signup'
 
 # --- Core App Functions ---
 @st.cache_data
@@ -146,6 +147,7 @@ def make_api_request(method, endpoint, data=None, params=None):
 
 # --- Main Spam Detector App ---
 def spam_detector_app():
+    init_session_state()
     # Sidebar for extra info
     with st.sidebar:
         st.markdown(f"### 👤 {st.session_state['username']}")
@@ -327,6 +329,7 @@ def spam_detector_app():
 
 # --- Authentication Pages ---
 def login_page():
+    init_session_state()
     st.markdown('<div class="auth-container"><h1 style="text-align: center; color: #00f2fe; margin-bottom: 20px;">Email Trust</h1>', unsafe_allow_html=True)
     
     cols = st.columns(2)
@@ -378,6 +381,7 @@ def login_page():
 
 # --- Main Flow ---
 if __name__ == "__main__":
+    init_session_state()
     if st.session_state['authenticated']:
         spam_detector_app()
     else:
