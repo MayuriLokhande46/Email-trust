@@ -78,8 +78,7 @@ app.add_middleware(
 )
 
 # Initialize user database
-user_db_conn = auth.create_connection()
-auth.create_table(user_db_conn)
+auth.create_table()
 
 
 # ==================== Request/Response Models ====================
@@ -173,7 +172,7 @@ def register(request: LoginRequest):
         - error: Error message if registration fails
     """
     try:
-        if auth.add_user(user_db_conn, request.username, request.password):
+        if auth.add_user(request.username, request.password):
             logger.info(f"User registered: {request.username}")
             return {"message": "User registered successfully"}
         else:
@@ -207,7 +206,7 @@ def login(request: LoginRequest):
         - token_type: "bearer"
     """
     try:
-        user = auth.get_user(user_db_conn, request.username)
+        user = auth.get_user(request.username)
         
         if not user or not auth.check_password(user[2], request.password):
             logger.warning(f"Login failed for user: {request.username}")
