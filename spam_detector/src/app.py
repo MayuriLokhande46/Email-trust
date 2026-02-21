@@ -348,6 +348,10 @@ def spam_detector_app():
 def login_page():
     init_session_state()
 
+    # Ensure auth_mode is set
+    if 'auth_mode' not in st.session_state:
+        st.session_state['auth_mode'] = 'Signup'
+
     st.markdown(
         "<h1 style='text-align:center; background: linear-gradient(90deg,#00f2fe,#4facfe); "
         "-webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:20px;'>"
@@ -355,51 +359,74 @@ def login_page():
         unsafe_allow_html=True
     )
 
-    tab1, tab2 = st.tabs(["📝 Sign Up", "🔑 Login"])
+    # Navigation buttons
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("📝 Sign Up", use_container_width=True,
+                     type="primary" if st.session_state['auth_mode'] == 'Signup' else "secondary"):
+            st.session_state['auth_mode'] = 'Signup'
+            st.rerun()
+    with col2:
+        if st.button("🔑 Login", use_container_width=True,
+                     type="primary" if st.session_state['auth_mode'] == 'Login' else "secondary"):
+            st.session_state['auth_mode'] = 'Login'
+            st.rerun()
 
-    with tab1:
-        with st.form("signup_form"):
+    st.markdown("---")
+
+    # ---- SIGN UP PAGE ----
+    if st.session_state['auth_mode'] == 'Signup':
+        st.subheader("✨ Create Account")
+        with st.form("signup_form", clear_on_submit=True):
             new_user = st.text_input("Username")
             new_pass = st.text_input("Password", type="password")
             conf_pass = st.text_input("Confirm Password", type="password")
-            if st.form_submit_button("Join Now", use_container_width=True, type="primary"):
-                if new_pass != conf_pass:
-                    st.error("Passwords don't match")
-                elif not new_user or not new_user.strip():
-                    st.warning("Username required")
-                else:
-                    try:
-                        success = auth_direct.add_user(new_user.strip(), new_pass)
-                        if success:
-                            st.success("🎉 Account created! Click the 'Login' tab to sign in.")
-                        else:
-                            st.error("Username already exists. Try a different one.")
-                    except Exception as e:
-                        st.error(f"Registration error: {str(e)}")
+            submitted = st.form_submit_button("Join Now 🚀", use_container_width=True, type="primary")
 
-    with tab2:
-        with st.form("login_form"):
-            user = st.text_input("Username")
-            pw = st.text_input("Password", type="password")
-            if st.form_submit_button("Sign In", use_container_width=True, type="primary"):
+        if submitted:
+            if new_pass != conf_pass:
+                st.error("❌ Passwords don't match")
+            elif not new_user or not new_user.strip():
+                st.warning("⚠️ Username is required")
+            else:
                 try:
-                    db_user = auth_direct.get_user(user.strip())
-                    if db_user and auth_direct.check_password(db_user[2], pw):
-                        # Generate a real JWT token so API calls (predictions etc.) work
-                        try:
-                            token = sec_direct.create_access_token({"sub": user.strip()})
-                        except Exception:
-                            token = 'local-auth'
-                        st.session_state['authenticated'] = True
-                        st.session_state['username'] = user.strip()
-                        st.session_state['token'] = token
-                        st.success("✅ Success! Loading Dashboard...")
-                        time.sleep(1)
+                    success = auth_direct.add_user(new_user.strip(), new_pass)
+                    if success:
+                        st.success("🎉 Account created! Taking you to Login...")
+                        time.sleep(1.5)
+                        st.session_state['auth_mode'] = 'Login'  # Auto switch to login
                         st.rerun()
                     else:
-                        st.error("Invalid username or password.")
+                        st.error("⚠️ Username already exists. Try a different one.")
                 except Exception as e:
-                    st.error(f"Login error: {str(e)}")
+                    st.error(f"Registration error: {str(e)}")
+
+    # ---- LOGIN PAGE ----
+    else:
+        st.subheader("👋 Welcome Back")
+        with st.form("login_form", clear_on_submit=True):
+            user = st.text_input("Username")
+            pw = st.text_input("Password", type="password")
+            submitted = st.form_submit_button("Sign In 🔑", use_container_width=True, type="primary")
+
+        if submitted:
+            try:
+                db_user = auth_direct.get_user(user.strip())
+                if db_user and auth_direct.check_password(db_user[2], pw):
+                    try:
+                        token = sec_direct.create_access_token({"sub": user.strip()})
+                    except Exception:
+                        token = 'local-auth'
+                    st.session_state['authenticated'] = True
+                    st.session_state['username'] = user.strip()
+                    st.session_state['token'] = token
+                    st.success("✅ Login successful! Opening Dashboard...")
+                    time.sleep(1)
+                    st.rerun()  # Auto-opens dashboard
+                else:
+                    st.error("❌ Invalid username or password.")
+            except Exception as e:
+                st.error(f"Login error: {str(e)}")
 
 
 # --- Main Flow ---
