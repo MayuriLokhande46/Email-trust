@@ -7,12 +7,27 @@ import logging
 # Set up logging
 logger = logging.getLogger(__name__)
 
-# Use absolute path for users.db
-ROOT = os.path.dirname(os.path.dirname(__file__))
-DB_PATH = os.path.join(ROOT, 'data', 'users.db')
+# Use /tmp for writable storage on Streamlit Cloud (read-only filesystem)
+# Falls back to local data/ directory for local dev
+def _get_db_path():
+    tmp_path = '/tmp/users.db'
+    local_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data')
+    local_path = os.path.join(local_dir, 'users.db')
+    # On cloud, /tmp is always writable
+    try:
+        os.makedirs('/tmp', exist_ok=True)
+        test_file = '/tmp/.write_test'
+        with open(test_file, 'w') as f:
+            f.write('test')
+        os.remove(test_file)
+        logger.info(f'Using /tmp database path')
+        return tmp_path
+    except Exception:
+        os.makedirs(local_dir, exist_ok=True)
+        logger.info(f'Using local database path: {local_path}')
+        return local_path
 
-# Ensure directory exists
-os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+DB_PATH = _get_db_path()
 
 @contextmanager
 def get_db_connection():

@@ -7,10 +7,20 @@ from contextlib import contextmanager
 # Set up logging
 logger = logging.getLogger(__name__)
 
-# Define the path for the database in the data directory
-ROOT = os.path.dirname(os.path.dirname(__file__))
-DB_PATH = os.path.join(ROOT, 'data', 'predictions.db')
-os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+# Define the path for the database - use /tmp on cloud (writable), local data/ dir otherwise
+def _get_predictions_db_path():
+    try:
+        test_file = '/tmp/.dbtest'
+        with open(test_file, 'w') as f:
+            f.write('ok')
+        os.remove(test_file)
+        return '/tmp/predictions.db'
+    except Exception:
+        local_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data')
+        os.makedirs(local_dir, exist_ok=True)
+        return os.path.join(local_dir, 'predictions.db')
+
+DB_PATH = _get_predictions_db_path()
 
 # Connection timeout to handle concurrent access
 DB_TIMEOUT = 10.0

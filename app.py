@@ -6,27 +6,25 @@ import time
 import nltk
 
 # Set page config at the very beginning
-st.set_page_config(page_title="Email Spam Detection", page_icon="📧")
+st.set_page_config(page_title="Email Spam Detection", page_icon="📧", layout="centered")
 
 # --- NLTK Data Download ---
 @st.cache_resource
 def download_nltk_data():
-    with st.spinner("Loading AI resources..."):
-        for res in ['punkt', 'stopwords', 'wordnet', 'omw-1.4', 'punkt_tab']:
-            try:
-                nltk.download(res, quiet=True)
-            except Exception as e:
-                pass
+    for res in ['punkt', 'stopwords', 'wordnet', 'omw-1.4', 'punkt_tab']:
+        try:
+            nltk.download(res, quiet=True)
+        except Exception:
+            pass
 
 # --- Backend Startup Logic ---
-@st.cache_resource
+@st.cache_resource(show_spinner=False)
 def start_backend():
     env = os.environ.copy()
     root_dir = os.path.dirname(os.path.abspath(__file__))
     env["PYTHONPATH"] = root_dir
     
     try:
-        # Start the backend server
         process = subprocess.Popen(
             [sys.executable, "-m", "uvicorn", "spam_detector.src.api:app", "--host", "0.0.0.0", "--port", "8000"],
             env=env,
@@ -34,7 +32,7 @@ def start_backend():
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
         )
-        time.sleep(5)
+        time.sleep(7)
         return process
     except Exception as e:
         return None
@@ -57,7 +55,7 @@ try:
     # Initialize session state
     init_session_state()
     
-    if st.session_state['authenticated']:
+    if st.session_state.get('authenticated', False):
         spam_detector_app()
     else:
         login_page()

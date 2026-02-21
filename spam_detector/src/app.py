@@ -338,54 +338,54 @@ def spam_detector_app():
 # --- Authentication Pages ---
 def login_page():
     init_session_state()
-    st.markdown('<div class="auth-container"><h1 style="text-align: center; color: #00f2fe; margin-bottom: 20px;">Email Trust</h1>', unsafe_allow_html=True)
-    
-    cols = st.columns(2)
-    if cols[0].button("📝 Sign Up", use_container_width=True, type="primary" if st.session_state['auth_mode'] == 'Signup' else "secondary"):
-        st.session_state['auth_mode'] = 'Signup'
-        st.rerun()
-    if cols[1].button("🔑 Login", use_container_width=True, type="primary" if st.session_state['auth_mode'] == 'Login' else "secondary"):
-        st.session_state['auth_mode'] = 'Login'
-        st.rerun()
 
-    if st.session_state['auth_mode'] == 'Signup':
-        st.subheader("Create Account")
-        with st.form("signup_form"):
-            new_user = st.text_input("Username")
-            new_pass = st.text_input("Password", type="password")
-            conf_pass = st.text_input("Confirm Password", type="password")
-            if st.form_submit_button("Join Now", use_container_width=True):
-                if new_pass != conf_pass:
-                    st.error("Passwords don't match")
-                elif not new_user:
-                    st.warning("Username required")
-                else:
-                    res = make_api_request('POST', '/register', data={"username": new_user, "password": new_pass})
-                    if res:
-                        st.success("🎉 Welcome! Redirecting to login...")
-                        time.sleep(1.5)
-                        st.session_state['auth_mode'] = 'Login'
+    # Use Streamlit columns for rock-solid centering on all screen sizes
+    _, center_col, _ = st.columns([1, 2, 1])
+
+    with center_col:
+        st.markdown(
+            "<h1 style='text-align:center; background: linear-gradient(90deg,#00f2fe,#4facfe); "
+            "-webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:30px;'>"
+            "📧 Email Trust</h1>",
+            unsafe_allow_html=True
+        )
+
+        tab1, tab2 = st.tabs(["📝 Sign Up", "🔑 Login"])
+
+        with tab1:
+            with st.form("signup_form"):
+                new_user = st.text_input("Username")
+                new_pass = st.text_input("Password", type="password")
+                conf_pass = st.text_input("Confirm Password", type="password")
+                if st.form_submit_button("Join Now", use_container_width=True, type="primary"):
+                    if new_pass != conf_pass:
+                        st.error("Passwords don't match")
+                    elif not new_user:
+                        st.warning("Username required")
+                    else:
+                        res = make_api_request('POST', '/register', data={"username": new_user, "password": new_pass})
+                        if res:
+                            st.success("🎉 Welcome! Click Login tab to sign in.")
+                            st.session_state['auth_mode'] = 'Login'
+                        else:
+                            st.error("Registration failed. Try a different username.")
+
+        with tab2:
+            with st.form("login_form"):
+                user = st.text_input("Username")
+                pw = st.text_input("Password", type="password")
+                if st.form_submit_button("Sign In", use_container_width=True, type="primary"):
+                    res = make_api_request('POST', '/login', data={"username": user, "password": pw})
+                    if res and 'access_token' in res:
+                        st.session_state['authenticated'] = True
+                        st.session_state['username'] = user
+                        st.session_state['token'] = res['access_token']
+                        st.success("✅ Success! Loading Dashboard...")
+                        time.sleep(1)
                         st.rerun()
                     else:
-                        st.error("Registration failed. Try a different username.")
-    else:
-        st.subheader("Welcome Back")
-        with st.form("login_form"):
-            user = st.text_input("Username")
-            pw = st.text_input("Password", type="password")
-            if st.form_submit_button("Sign In", use_container_width=True):
-                res = make_api_request('POST', '/login', data={"username": user, "password": pw})
-                if res and 'access_token' in res:
-                    st.session_state['authenticated'] = True
-                    st.session_state['username'] = user
-                    st.session_state['token'] = res['access_token']
-                    st.success("Success! Entering Dashboard...")
-                    time.sleep(1)
-                    st.rerun()
-                else:
-                    st.error("Login failed. Check username/password.")
-                    
-    st.markdown('</div>', unsafe_allow_html=True)
+                        st.error("Login failed. Check username/password.")
+
 
 # --- Main Flow ---
 if __name__ == "__main__":
