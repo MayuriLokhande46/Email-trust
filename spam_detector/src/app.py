@@ -10,7 +10,6 @@ import matplotlib.pyplot as plt
 import sys
 
 # Ensure project root is in path for absolute imports
-# src -> spam_detector -> root
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if project_root not in sys.path:
@@ -21,9 +20,17 @@ if current_dir not in sys.path:
 try:
     import spam_detector.src.predict as predict_module
     predict = predict_module.predict
+    import spam_detector.src.authentication as auth_direct
 except ImportError:
     import predict as predict_module
     predict = predict_module.predict
+    import authentication as auth_direct
+
+# Initialize the users table directly (independent of backend)
+try:
+    auth_direct.create_table()
+except Exception:
+    pass
 
 # --- Configuration ---
 API_URL = os.getenv("API_URL", "http://localhost:8000")
@@ -356,30 +363,36 @@ def login_page():
             if st.form_submit_button("Join Now", use_container_width=True, type="primary"):
                 if new_pass != conf_pass:
                     st.error("Passwords don't match")
-                elif not new_user:
+                elif not new_user or not new_user.strip():
                     st.warning("Username required")
                 else:
-                    res = make_api_request('POST', '/register', data={"username": new_user, "password": new_pass})
-                    if res:
-                        st.success("🎉 Account created! Go to Login tab to sign in.")
-                    else:
-                        st.error("Registration failed. Try a different username.")
+                    try:
+                        success = auth_direct.add_user(new_user.strip(), new_pass)
+                        if success:
+                            st.success("🎉 Account created! Click the 'Login' tab to sign in.")
+                        else:
+                            st.error("Username already exists. Try a different one.")
+                    except Exception as e:
+                        st.error(f"Registration error: {str(e)}")
 
     with tab2:
         with st.form("login_form"):
             user = st.text_input("Username")
             pw = st.text_input("Password", type="password")
             if st.form_submit_button("Sign In", use_container_width=True, type="primary"):
-                res = make_api_request('POST', '/login', data={"username": user, "password": pw})
-                if res and 'access_token' in res:
-                    st.session_state['authenticated'] = True
-                    st.session_state['username'] = user
-                    st.session_state['token'] = res['access_token']
-                    st.success("✅ Success! Loading Dashboard...")
-                    time.sleep(1)
-                    st.rerun()
-                else:
-                    st.error("Login failed. Check username/password.")
+                try:
+                    db_user = auth_direct.get_user(user.strip())
+                    if db_user and auth_direct.check_password(db_user[2], pw):
+                        st.session_state['authenticated'] = True
+                        st.session_state['username'] = user.strip()
+                        st.session_state['token'] = 'local-auth'
+                        st.success("✅ Success! Loading Dashboard...")
+                        time.sleep(1)
+                        st.rerun()
+                    else:
+                        st.error("Invalid username or password.")
+                except Exception as e:
+                    st.error(f"Login error: {str(e)}")
 
 
 # --- Main Flow ---
