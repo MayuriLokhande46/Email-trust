@@ -139,7 +139,11 @@ def make_api_request(method, endpoint, data=None, params=None):
             st.session_state['token'] = ''
             st.rerun()
         else:
-            st.error(f"API Error ({endpoint}): {response.status_code}")
+            try:
+                err_msg = response.json().get('error', response.json().get('detail', 'Unknown error'))
+                st.error(f"API Error ({endpoint}): {err_msg}")
+            except:
+                st.error(f"API Error ({endpoint}): {response.status_code}")
             return None
     except Exception as e:
         st.error(f"Connection Error: {str(e)}")
