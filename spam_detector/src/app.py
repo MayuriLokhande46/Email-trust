@@ -377,7 +377,8 @@ def login_page():
     st.markdown('</div>', unsafe_allow_html=True)
 
 # --- Main Flow ---
-if st.session_state['authenticated']:
-    spam_detector_app()
-else:
-    login_page()
+if __name__ == "__main__":
+    if st.session_state['authenticated']:
+        spam_detector_app()
+    else:
+        login_page()
