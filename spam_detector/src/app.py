@@ -34,22 +34,26 @@ st.set_page_config(page_title="Email Spam Detection", page_icon="📧")
 # Custom CSS for Premium Look
 st.markdown("""
 <style>
-    /* Main Background */
+    /* Main Background & Centering */
     .stApp {
         background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
         color: #ffffff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
     
-    /* Center Authentication Card */
     .auth-container {
+        width: 100%;
         max-width: 500px;
-        margin: 50px auto;
+        margin: auto;
         padding: 40px;
         background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(10px);
-        border-radius: 20px;
+        backdrop-filter: blur(15px);
         border: 1px solid rgba(255, 255, 255, 0.1);
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        text-align: center;
     }
     
     /* Headers */

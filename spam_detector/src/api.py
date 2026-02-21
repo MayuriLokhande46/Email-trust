@@ -184,10 +184,11 @@ def register(request: LoginRequest):
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Registration error: {str(e)}")
+        error_detail = f"{type(e).__name__}: {str(e)}"
+        logger.error(f"Registration error: {error_detail}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Registration failed: {str(e)}"
+            detail=f"Registration failed: {error_detail}"
         )
 
 
