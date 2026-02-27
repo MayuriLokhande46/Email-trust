@@ -392,8 +392,8 @@ def login_page():
                 try:
                     success = auth_direct.add_user(new_user.strip(), new_pass)
                     if success:
-                        st.success("🎉 Account created! Taking you to Login...")
-                        time.sleep(1.5)
+                        st.success("🎉 Account created! Redirecting to Login...")
+                        st.session_state['signup_username'] = new_user.strip()  # Save for pre-filling
                         st.session_state['auth_mode'] = 'Login'  # Auto switch to login
                         st.rerun()
                     else:
@@ -405,7 +405,9 @@ def login_page():
     else:
         st.subheader("👋 Welcome Back")
         with st.form("login_form", clear_on_submit=True):
-            user = st.text_input("Username")
+            # Pre-fill username if coming from signup
+            saved_username = st.session_state.get('signup_username', '')
+            user = st.text_input("Username", value=saved_username)
             pw = st.text_input("Password", type="password")
             submitted = st.form_submit_button("Sign In 🔑", use_container_width=True, type="primary")
 
